@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الأساتذة والمشرفات - منصة المسجد</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .kufi-font { font-family: 'Amiri', serif; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans p-6 min-h-screen flex items-center justify-center">
+
+    <div id="teacherLoginBox" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-blue-100">
+        <div class="text-center mb-6">
+            <span class="text-4xl">👨‍🏫</span>
+            <h1 class="text-2xl font-bold text-blue-950 mt-2">بوابة الأساتذة والمشرفات</h1>
+            <p class="text-gray-500 text-sm">اختر اسمك وأدخل الكود الخاص بك للدخول إلى حلقتك</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-1">اختر اسمك</label>
+                <select id="loginTeacherSelect" class="w-full border p-2.5 rounded-lg bg-gray-50 focus:outline-none focus:border-blue-600">
+                    <option value="">-- اختر اسمك --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-1">الكود الخاص بك</label>
+                <input type="password" id="loginTeacherCode" placeholder="أدخل الكود السري الخاص بك" class="w-full border p-2.5 rounded-lg bg-gray-50 focus:outline-none focus:border-blue-600">
+            </div>
+
+            <button onclick="loginTeacher()" class="w-full bg-blue-700 text-white font-semibold p-3 rounded-lg hover:bg-blue-800 transition shadow-md">دخول الحلقة</button>
+            <div id="teacherLoginError" class="hidden text-red-600 text-sm text-center font-medium bg-red-50 p-2 rounded"></div>
+        </div>
+
+        <div class="mt-6 text-center text-sm border-t pt-4">
+            <a href="student.html" class="text-blue-700 hover:underline font-medium">الذهاب إلى صفحة تسجيل الطلاب &larr;</a>
+        </div>
+    </div>
+
+    <div id="teacherDashboard" class="hidden max-w-4xl w-full bg-white rounded-xl shadow-lg p-6">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <div>
+                <h1 id="teacherHeaderTitle" class="text-xl font-bold text-blue-900">حلقتي الخاصة</h1>
+                <p id="teacherHeaderSpecialty" class="text-xs text-gray-500">تخصص الحلقة</p>
+            </div>
+            <button onclick="logoutTeacher()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-red-600 transition">تسجيل خروج</button>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6 text-right">
+            <h3 class="font-bold text-blue-900 text-sm mb-2">📢 إعلانات وتوجيهات الإدارة للأساتذة:</h3>
+            <div id="teacherAnnouncementsContainer" class="space-y-2"></div>
+        </div>
+
+        <p class="text-gray-600 mb-4 text-sm font-semibold">إدارة طلاب حلقتك (المقدار، التقدير، الملاحظة الخاصة للطالب، وحالة الحضور):</p>
+
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-right border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b text-xs text-gray-700">
+                        <th class="p-3">اسم الطالب/ة</th>
+                        <th class="p-3">المقدار والتقدير</th>
+                        <th class="p-3">ملاحظة الشيخ (تظهر للطالب)</th>
+                        <th class="p-3">الحضور</th>
+                        <th class="p-3">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherStudentsTable"></tbody>
+            </table>
+        </div>
+
+        <div class="bg-indigo-50/70 border border-indigo-200 p-4 rounded-xl">
+            <h3 class="font-bold text-indigo-900 text-sm mb-2">✉️ إرسال ملاحظة أو تقرير عام للإدارة</h3>
+            <form id="sendTeacherNoteForm" class="space-y-3">
+                <input type="text" id="teacherNoteSubject" required placeholder="عنوان الملاحظة (مثال: تقرير عن حلقة التثبيت)" class="w-full border p-2.5 rounded bg-white text-sm focus:outline-none focus:border-indigo-600">
+                <textarea id="teacherNoteContent" required placeholder="اكتب تفاصيل التقرير هنا..." rows="2" class="w-full border p-2.5 rounded bg-white text-sm focus:outline-none focus:border-indigo-600"></textarea>
+                <button type="submit" class="bg-indigo-700 text-white font-semibold px-4 py-2 rounded text-sm hover:bg-indigo-800 transition">إرسال للإدارة</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentAuthenticatedTeacher = null;
+
+        function initTeacherLoginDropdown() {
+            let teachers = JSON.parse(localStorage.getItem('teachersList')) || [];
+            const select = document.getElementById('loginTeacherSelect');
+            select.innerHTML = '<option value="">-- اختر اسمك --</option>';
+            teachers.forEach(t => {
+                select.innerHTML += `<option value="${t.name}">${t.name} (${t.specialty})</option>`;
+            });
+        }
+
+        function loginTeacher() {
+            const selectedName = document.getElementById('loginTeacherSelect').value;
+            const enteredCode = document.getElementById('loginTeacherCode').value.trim();
+            const errorDiv = document.getElementById('teacherLoginError');
+
+            errorDiv.classList.add('hidden');
+
+            if (!selectedName || !enteredCode) {
+                errorDiv.innerText = "الرجاء اختيار الاسم وإدخال الكود الخاص بك!";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            let teachers = JSON.parse(localStorage.getItem('teachersList')) || [];
+            const teacherObj = teachers.find(t => t.name === selectedName);
+
+            if (!teacherObj || teacherObj.code !== enteredCode) {
+                errorDiv.innerText = "الكود الخاص غير صحيح!";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            currentAuthenticatedTeacher = teacherObj;
+
+            document.getElementById('teacherLoginBox').classList.add('hidden');
+            document.getElementById('teacherDashboard').classList.remove('hidden');
+            document.body.classList.remove('flex', 'items-center', 'justify-center');
+
+            document.getElementById('teacherHeaderTitle').innerText = `حلقة الأستاذ/ة: ${teacherObj.name}`;
+            document.getElementById('teacherHeaderSpecialty').innerText = `التخصص: ${teacherObj.specialty}`;
+
+            loadTeacherStudents();
+            loadTeacherAnnouncements();
+        }
+
+        function logoutTeacher() {
+            currentAuthenticatedTeacher = null;
+            document.getElementById('teacherDashboard').classList.add('hidden');
+            document.getElementById('teacherLoginBox').classList.remove('hidden');
+            document.body.classList.add('flex', 'items-center', 'justify-center');
+            document.getElementById('loginTeacherCode').value = '';
+            initTeacherLoginDropdown();
+        }
+
+        document.getElementById('sendTeacherNoteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!currentAuthenticatedTeacher) return;
+
+            const subject = document.getElementById('teacherNoteSubject').value.trim();
+            const content = document.getElementById('teacherNoteContent').value.trim();
+
+            let teacherNotes = JSON.parse(localStorage.getItem('teacherNotesToAdmin')) || [];
+            teacherNotes.push({
+                id: Date.now(),
+                teacherName: currentAuthenticatedTeacher.name,
+                subject: subject,
+                content: content,
+                date: new Date().toLocaleDateString('ar-EG')
+            });
+
+            localStorage.setItem('teacherNotesToAdmin', JSON.stringify(teacherNotes));
+            alert('تم إرسال الملاحظة العامة إلى الإدارة بنجاح!');
+            this.reset();
+        });
+
+        function loadTeacherAnnouncements() {
+            let announcements = JSON.parse(localStorage.getItem('mosqueAnnouncements')) || [];
+            const container = document.getElementById('teacherAnnouncementsContainer');
+            container.innerHTML = announcements.length === 0 ? '<p class="text-gray-500 text-xs">لا توجد إعلانات جديدة حالياً.</p>' : '';
+            announcements.forEach(item => {
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                        <h4 class="font-bold text-blue-900 text-xs">${item.title}</h4>
+                        <p class="text-gray-700 text-xs mt-1">${item.text}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function loadTeacherStudents() {
+            if (!currentAuthenticatedTeacher) return;
+
+            const tableBody = document.getElementById('teacherStudentsTable');
+            tableBody.innerHTML = '';
+
+            let studentsRequests = JSON.parse(localStorage.getItem('studentsRequests')) || [];
+            const myStudents = studentsRequests.filter(s => (s.status === 'accepted' || s.status === 'graduated') && s.teacherName === currentAuthenticatedTeacher.name);
+
+            if (myStudents.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا يوجد طلاب مقبولين في حلقتك حتى الآن</td></tr>`;
+                return;
+            }
+
+            myStudents.forEach(student => {
+                tableBody.innerHTML += `
+                    <tr class="border-b ${student.progress === '60' ? 'bg-amber-50/50' : ''}">
+                        <td class="p-3 font-medium text-sm">
+                            ${student.name} 
+                            <span class="text-[11px] text-gray-500 block">${student.age} سنة (${student.gender === 'male' ? 'ذكر' : 'أنثى'})</span>
+                            ${student.status === 'graduated' ? '<span class="text-amber-600 font-bold block text-xs">⭐ خاتم معتمد</span>' : ''}
+                        </td>
+                        <td class="p-3 space-y-1">
+                            <input type="text" id="prog_${student.id}" value="${student.progress || ''}" placeholder="الحزب (مثال: 15)" class="border p-1 rounded text-xs w-full bg-gray-50">
+                            <select id="eval_${student.id}" class="border p-1 rounded text-xs w-full bg-gray-50">
+                                <option ${student.evaluation === 'ممتاز' ? 'selected' : ''}>ممتاز</option>
+                                <option ${student.evaluation === 'جيد جداً' ? 'selected' : ''}>جيد جداً</option>
+                                <option ${student.evaluation === 'مقبول' ? 'selected' : ''}>مقبول</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <textarea id="notes_${student.id}" rows="2" placeholder="اكتب ملاحظة للطالب هنا..." class="border p-1.5 rounded text-xs w-full bg-gray-50">${student.notes || ''}</textarea>
+                        </td>
+                        <td class="p-3">
+                            <select id="att_${student.id}" class="border p-1.5 rounded text-xs bg-gray-50">
+                                <option value="حاضر" ${student.attendance === 'حاضر' ? 'selected' : ''}>حاضر</option>
+                                <option value="غائب" ${student.attendance === 'غائب' ? 'selected' : ''}>غائب</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="saveStudentProgress('${student.id}')" class="bg-blue-600 text-white px-3 py-2 rounded text-xs hover:bg-blue-700 transition">حفظ وإرسال</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function saveStudentProgress(studentId) {
+            const progress = document.getElementById(`prog_${studentId}`).value.trim();
+            const evaluation = document.getElementById(`eval_${studentId}`).value;
+            const notes = document.getElementById(`notes_${studentId}`).value.trim();
+            const attendance = document.getElementById(`att_${studentId}`).value;
+
+            let studentsRequests = JSON.parse(localStorage.getItem('studentsRequests')) || [];
+            studentsRequests = studentsRequests.map(s => {
+                if(s.id == studentId) {
+                    s.progress = progress;
+                    s.evaluation = evaluation;
+                    s.notes = notes;
+                    s.attendance = attendance;
+
+                    if (progress === "60") {
+                        s.status = 'graduated';
+                    }
+                }
+                return s;
+            });
+
+            localStorage.setItem('studentsRequests', JSON.stringify(studentsRequests));
+            alert('تم حفظ التقييم والملاحظة وإرسالها إلى صفحة الطالب بنجاح!');
+            loadTeacherStudents();
+        }
+
+        initTeacherLoginDropdown();
+
+        window.addEventListener('storage', function(e) {
+            if (currentAuthenticatedTeacher) {
+                loadTeacherStudents();
+                loadTeacherAnnouncements();
+            } else {
+                initTeacherLoginDropdown();
+            }
+        });
+    </script>
+</body>
+</html>
