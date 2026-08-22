@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة المسجد الذكية - لوحة الإدارة المؤمنة بكود المسجد</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, rgba(16, 93, 71, 0.7) 0%, rgba(8, 45, 34, 0.8) 100%);
+            --accent-color: #f1c40f;
+            --accent-gradient: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+            --text-color: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-bg-hover: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-focus: rgba(241, 196, 15, 0.6);
+            --shadow-3d: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(125deg, #030d0a, #082d22, #020907);
+            background-size: 400% 400%;
+            animation: fluidBackground 18s ease infinite;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @keyframes fluidBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #mosqueSetupScreen, #adminAuthModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 13, 10, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .setup-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            padding: 45px;
+            border-radius: 35px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: var(--shadow-3d);
+            border: 1px solid var(--glass-border);
+        }
+
+        .setup-card h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 1.9rem;
+            text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3);
+        }
+
+        .setup-card p {
+            text-align: center;
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        aside {
+            width: 290px;
+            background: rgba(8, 35, 27, 0.4);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-left: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 15px 0 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo-area {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo-area h2 {
+            font-size: 1.25rem;
+            color: var(--accent-color);
+            text-shadow: 0 2px 8px rgba(241, 196, 15, 0.3);
+        }
+
+        .logo-area span {
+            font-size: 0.8rem;
+            opacity: 0.75;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 12px;
+            flex-grow: 1;
+        }
+
+        .nav-links li {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .nav-links li:hover, .nav-links li.active {
+            background: var(--glass-bg-hover);
+            box-shadow: var(--shadow-3d);
+            transform: translateX(-6px);
+            border: 1px solid var(--glass-border);
+            border-right: 5px solid var(--accent-color);
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background: rgba(8, 35, 27, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 35px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .content-section {
+            display: none;
+            padding: 40px;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 35px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-3d);
+            margin-bottom: 30px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .card h2 {
+            margin-bottom: 22px;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            text-align: center;
+            text-shadow: 0 2px 6px rgba(241, 196, 15, 0.3);
+        }
+
+        .quran-verse-banner {
+            background: linear-gradient(135deg, rgba(16, 93, 71, 0.4), rgba(5, 30, 22, 0.6));
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-3d);
+        }
+
+        .allah-name-art {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(241, 196, 15, 0.4);
+            letter-spacing: 2px;
+        }
+
+        .quran-verse-text {
+            font-size: 1.15rem;
+            color: #e2e8f0;
+            font-style: italic;
+            line-height: 1.8;
+            font-family: 'Traditional Arabic', 'Amiri', serif;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 15px 18px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            font-size: 1rem;
+            color: #fff;
+            outline: none;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4), inset 0 -1px 2px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--glass-border-focus);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.25), inset 0 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            background: var(--accent-gradient);
+            color: #05130f;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            box-shadow: 0 12px 25px rgba(241, 196, 15, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 30px rgba(241, 196, 15, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.7);
+        }
+
+        .btn-success { background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; border: none; padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 6px 15px rgba(46,204,113,0.35), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; border: none; padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 6px 15px rgba(231,76,60,0.35), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-warning { background: linear-gradient(135deg, #d35400, #e67e22); color: #fff; border: none; padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 6px 15px rgba(230,126,34,0.35), inset 0 2px 3px rgba(255,255,255,0.4); }
+        .btn-info { background: linear-gradient(135deg, #2980b9, #3498db); color: #fff; border: none; padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 6px 15px rgba(52,152,219,0.35), inset 0 2px 3px rgba(255,255,255,0.4); }
+
+        .success-badge {
+            display: none;
+            background: rgba(46, 204, 113, 0.12);
+            backdrop-filter: blur(15px);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            padding: 20px;
+            border-radius: 18px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: right;
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--accent-color);
+            font-weight: bold;
+            border: 1px solid var(--glass-border);
+        }
+
+        tr td:first-child { border-right: 1px solid var(--glass-border); border-top-right-radius: 15px; border-bottom-right-radius: 15px; }
+        tr td:last-child { border-left: 1px solid var(--glass-border); border-top-left-radius: 15px; border-bottom-left-radius: 15px; }
+
+        .professor-box, .post-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: var(--shadow-3d);
+            margin-bottom: 25px;
+            border-right: 6px solid var(--accent-color);
+            border: 1px solid var(--glass-border);
+        }
+
+        .post-card h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+
+        .post-card p {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .post-date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: left;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 35px;
+        }
+
+        .stat-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(12, 45, 35, 0.5);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-3d);
+            border: 3px solid var(--accent-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .stat-circle:hover {
+            transform: scale(1.1) translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-circle span:first-child {
+            font-size: 2.3rem;
+            font-weight: bold;
+            line-height: 1.1;
+            color: var(--accent-color);
+            text-shadow: 0 2px 8px rgba(241,196,15,0.4);
+        }
+
+        .stat-circle span:last-child {
+            font-size: 0.82rem;
+            margin-top: 6px;
+            opacity: 0.9;
+        }
+
+        .honor-wall {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .honor-card {
+            background: linear-gradient(135deg, rgba(40, 30, 5, 0.35), rgba(15, 10, 2, 0.5));
+            backdrop-filter: blur(25px);
+            border: 2px solid var(--accent-color);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow-3d);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .honor-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .honor-card::before {
+            content: '👑';
+            font-size: 2.6rem;
+            display: block;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+        }
+
+        .honor-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+
+        .honor-prof {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 18px;
+        }
+
+        .honor-badge {
+            background: var(--accent-gradient);
+            color: #030d0a;
+            padding: 7px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(241,196,15,0.35);
+        }
+
+        .invitation-document, .summons-document {
+            background: #ffffff;
+            color: #222;
+            padding: 40px;
+            border-radius: 25px;
+            max-width: 750px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .invitation-document { border: 4px double #d4af37; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .summons-document { border: 3px double #0f4c3a; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .invitation-header, .summons-header { text-align: center; padding-bottom: 15px; margin-bottom: 25px; }
+        .invitation-header { border-bottom: 2px solid #d4af37; }
+        .summons-header { border-bottom: 2px solid #0f4c3a; }
+        .invitation-header h1 { color: #d4af37; font-size: 1.6rem; margin-bottom: 5px; }
+        .summons-header h1 { color: #0f4c3a; font-size: 1.5rem; margin-bottom: 5px; }
+        .invitation-body p, .summons-body p { font-size: 1.1rem; line-height: 2; margin-bottom: 15px; }
+        .invitation-signatures, .summons-signatures { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
+        .signature-box { border-top: 1px dashed #444; padding-top: 10px; font-weight: bold; font-size: 0.95rem; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(10, 38, 29, 0.85);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            padding: 40px;
+            border-radius: 30px;
+            width: 85%;
+            max-width: 850px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid var(--glass-border);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #cbd5e1;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover { color: #e74c3c; }
+
+        /* تعديلات الطباعة المحدثة لمنع أي تقطيع أو إزاحة */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            
+            #printableSummons, #printableSummons *, 
+            #printableInvitation, #printableInvitation * {
+                visibility: visible !important;
+            }
+
+            #printableSummons, #printableInvitation {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                direction: rtl !important;
+                border: 2px solid #0f4c3a !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            @page {
+                size: landscape;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mosqueSetupScreen">
+        <div class="setup-card">
+            <h2>إعداد منصة المسجد الذكية</h2>
+            <p>يرجى تسجيل بيانات المسجد وكود الدخول الأمني للبدء</p>
+            <form onsubmit="setupMosque(event)">
+                <div class="form-group">
+                    <label>اسم المسجد:</label>
+                    <input type="text" id="setupMosqueName" placeholder="مثال: مسجد الإمام مالك" required>
+                </div>
+                <div class="form-group">
+                    <label>الموقع الجغرافي (المدينة / الحي):</label>
+                    <input type="text" id="setupMosqueLocation" placeholder="مثال: الجزائر العاصمة - وسط" required>
+                </div>
+                <div class="form-group">
+                    <label>إنشاء كود الدخول السري (كود المسجد):</label>
+                    <input type="password" id="setupMosqueCode" placeholder="أدخل كود سري للمسجد" required>
+                </div>
+                <div class="form-group">
+                    <label>تأكيد كود الدخول السري:</label>
+                    <input type="password" id="setupMosqueCodeConfirm" placeholder="أعد إدخال الكود للتأكيد" required>
+                </div>
+                <button type="submit" class="btn" style="margin-top: 10px;">حفظ والدخول للمنصة</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="adminAuthModal" style="display: none;">
+        <div class="setup-card">
+            <h2>🔐 حماية لوحة الإدارة</h2>
+            <p>هذه لوحة محمية. يرجى إدخال <strong>كود المسجد السري</strong> للوصول:</p>
+            <form onsubmit="verifyAdminAccess(event)">
+                <div class="form-group">
+                    <label>كود المسجد:</label>
+                    <input type="password" id="adminEnteredCode" placeholder="أدخل كود المسجد السري" required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn" style="flex: 1;">دخول الإدارة</button>
+                    <button type="button" class="btn-danger" style="flex: 1; border-radius: 18px; font-weight: bold;" onclick="cancelAdminAccess()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <aside class="no-print">
+        <div class="logo-area">
+            <h2 id="sidebarMosqueName">منصة المسجد الذكية</h2>
+            <span id="sidebarMosqueLocation">الموقع</span>
+        </div>
+        <ul class="nav-links">
+            <li id="navStudent" class="active" onclick="switchTab('student')">صفحة الطالب وتقاريره</li>
+            <li id="navProfessor" onclick="switchTab('professor')">لوحة تحكم الأستاذ</li>
+            <li id="navAdmin" onclick="switchTab('admin')">لوحة تحكم الإدارة 🔒</li>
+            <li id="navPosts" onclick="switchTab('posts')">منشورات وتعاميم المسجد</li>
+            <li id="navHonor" onclick="switchTab('honor')">🌟 لوحة شرف الخاتمين</li>
+        </ul>
+    </aside>
+
+    <main>
+        <header class="no-print">
+            <h2 id="headerTitle" style="color: var(--accent-color); text-shadow: 0 2px 8px rgba(241,196,15,0.3);">بوابة الطالب الذكية</h2>
+            <span id="headerMosqueDisplay" style="opacity: 0.85;">نظام دعوات التكريم الرسمية</span>
+        </header>
+
+        <div id="studentSection" class="content-section active">
+            
+            <div class="quran-verse-banner">
+                <div class="allah-name-art">﷽ • الله جل جلاله</div>
+                <div class="quran-verse-text">﴿إِنَّ هَذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ وَيُبَشِّرُ الْمُؤْمِنِينَ الَّذِينَ يَعْمَلُونَ الصَّالِحَاتِ أَنَّ لَهُمْ أَجْرًا كَبِيرًا﴾</div>
+            </div>
+
+            <div class="card" style="border-right: 6px solid #3498db; max-width: 100%;">
+                <h3 style="color: var(--accent-color); margin-bottom: 12px; text-align: center;">🕌 مواقيت الصلاة في المسجد</h3>
+                <div id="displayPrayerStudent" style="display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 10px;"></div>
+            </div>
+
+            <div class="card" id="studentRegistrationCard">
+                <h2>استمارة الانضمام لحلقات المسجد</h2>
+                <form id="studentForm" onsubmit="registerStudent(event)">
+                    <div class="form-group">
+                        <label>اسم الطالب الثلاثي:</label>
+                        <input type="text" id="studentName" placeholder="أدخل اسمك الكامل" required>
+                    </div>
+                    <div class="form-group">
+                        <label>العمر (الحد الأدنى 6 سنوات):</label>
+                        <input type="number" id="studentAge" placeholder="أدخل العمر" min="1" max="40" required>
+                    </div>
+                    <div class="form-group">
+                        <label>المستوى:</label>
+                        <select id="studentLevel" required>
+                            <option value="" disabled selected style="background: #082d22;">اختر مستواك</option>
+                            <option value="مبتدئ" style="background: #082d22;">مبتدئ</option>
+                            <option value="متوسط" style="background: #082d22;">متوسط</option>
+                            <option value="متقدم" style="background: #082d22;">متقدم</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>اختر الأستاذ (حلقة التحفيظ):</label>
+                        <select id="studentPreferredProf" required>
+                            <option value="" disabled selected style="background: #082d22;">جاري تحميل الأساتذة...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">إرسال طلب التسجيل</button>
+                </form>
+
+                <div id="successBadge" class="success-badge">
+                    🎉 مبارك انضمامك إلينا! تم قبول طلبك من طرف الإدارة.
+                </div>
+            </div>
+
+            <div id="studentReportCard" style="display: none;">
+                <div id="khatimCongratsCard" style="display: none; background: linear-gradient(135deg, rgba(60,45,5,0.5), rgba(30,20,2,0.6)); border: 3px solid var(--accent-color); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; box-shadow: var(--shadow-3d); backdrop-filter: blur(20px);">
+                    <h2 style="color: var(--accent-color); font-size: 1.8rem; margin-bottom: 10px;">🏆 مبارك ألف مبارك ختم القرآن الكريم! 🏆</h2>
+                    <p style="font-size: 1.1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 15px;">لقد أتممت حفظ كتاب الله عز وجل وعُرض اسمك في لوحة شرف الخاتمين.</p>
+                    <button class="btn" style="width: auto; padding: 12px 28px;" onclick="openInvitationModalByName(localStorage.getItem('currentStudentName'))">📜 عرض وطباعة دعوة حفل التكريم الرسمية</button>
+                </div>
+
+                <div class="card" style="border-right: 6px solid #2ecc71;">
+                    <h2 style="color: #2ecc71;">🎉 قبولك الرسمي في الحلقة</h2>
+                    <p style="text-align: center; margin-bottom: 20px; color: #cbd5e1;">يمكنك طباعة استدعاء القبول الخاص بك.</p>
+                    <button class="btn" onclick="openSummonsModal()">📄 عرض وطباعة استدعاء القبول الرسمي</button>
+                </div>
+
+                <div class="card">
+                    <h2>متابعة تقرير الأستاذ الشخصي</h2>
+                    <div style="background: rgba(0,0,0,0.25); padding: 25px; border-radius: 20px; border: 1px solid var(--glass-border); backdrop-filter: blur(15px);">
+                        <p style="margin-bottom: 12px;"><strong>الأستاذ المشرف:</strong> <span id="viewStudentProf">-</span></p>
+                        <p style="margin-bottom: 12px;"><strong>رقمك الترتيبى في الحلقة:</strong> <span id="viewStudentRank" style="color: var(--accent-color); font-weight: bold;">-</span></p>
+                        <p style="margin-bottom: 12px;"><strong>عدد الأحزاب المحفوظة:</strong> <span id="viewStudentHizb" style="color: var(--accent-color); font-weight: bold;">0</span> حزب</p>
+                        <p style="margin-bottom: 12px;"><strong>حالة الحضور الأخيرة:</strong> <span id="viewStudentAttendance" style="font-weight: bold;">لم يسجل</span></p>
+                        <p style="margin-bottom: 0;"><strong>ملاحظات الأستاذ:</strong> <span id="viewStudentNotes" style="color: #cbd5e1;">لم يكتب الأستاذ ملاحظات بعد.</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="professorSection" class="content-section">
+            <div style="max-width: 1000px; margin: 0 auto;">
+                <div id="professorLoginCard" class="card">
+                    <h2>تسجيل دخول الأستاذ</h2>
+                    <form onsubmit="verifyProfessorLogin(event)">
+                        <div class="form-group">
+                            <label>أدخل كود الدخول الخاص بك:</label>
+                            <input type="password" id="profAccessCode" placeholder="أدخل الكود السري" required>
+                        </div>
+                        <button type="submit" class="btn">دخول إلى الحلقة</button>
+                    </form>
+                </div>
+
+                <div id="professorDashboard" style="display: none;">
+                    
+                    <div class="card" style="border-right: 6px solid #3498db; margin-bottom: 25px; max-width: 100%;">
+                        <h3 style="color: var(--accent-color); margin-bottom: 12px; text-align: center;">🕌 مواقيت الصلاة الحالية</h3>
+                        <div id="displayPrayerProfessor" style="display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 10px;"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--accent-color); margin: 0;">مرحباً بالشيخ/ الأستاذ: <span id="loggedInProfName"></span></h2>
+                        <button class="btn-danger" style="width: auto; padding: 10px 20px;" onclick="professorLogout()">تسجيل الخروج</button>
+                    </div>
+
+                    <h3 style="color: var(--accent-color); margin-bottom: 15px;">قائمة طلاب حلقتك (التقييم والحضور) - أدخل 60 للختم</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الترتيب</th>
+                                <th>اسم الطالب</th>
+                                <th>العمر</th>
+                                <th>المستوى</th>
+                                <th>الأحزاب (60 للختم)</th>
+                                <th>الملاحظات</th>
+                                <th>الحضور</th>
+                                <th>إجراء الحفظ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminSection" class="content-section">
+            <div style="max-width: 950px; margin: 0 auto;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <button class="btn-info" style="width: auto; padding: 10px 20px;" onclick="lockAdminDashboard()">🔒 قفل لوحة الإدارة</button>
+                    <button class="btn-danger" style="width: auto; padding: 12px 25px;" onclick="logoutMosqueSetup()">🚪 تسجيل الخروج من المسجد (إعادة ضبط)</button>
+                </div>
+
+                <div class="card" style="max-width: 100%; margin-bottom: 30px; border-right: 6px solid #3498db;">
+                    <h2 style="color: #3498db;">⏰ إدارة وتحديث مواقيت الصلوات</h2>
+                    <form id="prayerTimesForm" onsubmit="savePrayerTimes(event)" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;">
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.9rem;">الفجر:</label>
+                            <input type="time" id="prayerFajr" required>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.9rem;">الظهر:</label>
+                            <input type="time" id="prayerDhuhr" required>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.9rem;">العصر:</label>
+                            <input type="time" id="prayerAsr" required>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.9rem;">المغرب:</label>
+                            <input type="time" id="prayerMaghrib" required>
+                        </div>
+                        <div style="flex: 1; min-width: 120px;">
+                            <label style="font-size: 0.9rem;">العشاء:</label>
+                            <input type="time" id="prayerIsha" required>
+                        </div>
+                        <div style="width: 100%; margin-top: 15px;">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #2980b9, #3498db); color: #fff;">حفظ وتحديث مواقيت الصلاة للجميع</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-circle" onclick="openProfessorsModal()" title="انقر لعرض تفاصيل الأساتذة وأكوادهم">
+                        <span id="statProfCount">0</span>
+                        <span>عدد الأساتذة</span>
+                    </div>
+                    <div class="stat-circle" onclick="openStudentsModal()" title="انقر لعرض تفاصيل الطلاب">
+                        <span id="statStudentCount">0</span>
+                        <span>عدد الطلاب</span>
+                    </div>
+                </div>
+
+                <div class="card" style="max-width: 100%; margin-bottom: 30px;">
+                    <h2>تسجيل أستاذ جديد وتعيين كود دخول</h2>
+                    <form id="professorRegisterForm" onsubmit="registerProfessor(event)" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <input type="text" id="profName" placeholder="اسم الأستاذ الكامل" style="flex: 2;" required>
+                        <input type="text" id="profSpecialty" placeholder="التخصص" style="flex: 1.5;" required>
+                        <input type="text" id="profCode" placeholder="كود الدخول السري" style="flex: 1.5;" required>
+                        <button type="submit" class="btn" style="flex: 1; width: auto;">إضافة الأستاذ</button>
+                    </form>
+                </div>
+
+                <div class="card" style="max-width: 100%; margin-bottom: 30px; border-right: 6px solid var(--accent-color);">
+                    <h2 id="postFormHeading">نشر تعاميم ومنشورات المسجد العامة</h2>
+                    <form id="postForm" onsubmit="savePostForm(event)">
+                        <input type="hidden" id="editPostIndex" value="-1">
+                        <div class="form-group">
+                            <label>عنوان المنشور:</label>
+                            <input type="text" id="postTitleInput" placeholder="أدخل عنوان التعميم أو المنشور" required>
+                        </div>
+                        <div class="form-group">
+                            <label>نص المنشور والتفاصيل:</label>
+                            <textarea id="postContentInput" rows="4" placeholder="اكتب تفاصيل المنشور هنا..." required></textarea>
+                        </div>
+                        <button type="submit" id="postSubmitBtn" class="btn">نشر وإرسال للجميع</button>
+                        <button type="button" id="postCancelBtn" class="btn-danger" style="display:none; width: 100%; margin-top: 10px; padding: 12px;" onclick="cancelEditPost()">إلغاء التعديل</button>
+                    </form>
+                </div>
+
+                <h2 style="color: var(--accent-color); margin-bottom: 15px;">إدارة المنشورات الحالية</h2>
+                <div id="adminPostsListContainer" style="margin-bottom: 30px;"></div>
+
+                <h2 style="color: var(--accent-color); margin-bottom: 15px;">ملفات الطلاب وسجلات الحلقات (الإدارة)</h2>
+                <div id="adminProfessorsListContainer"></div>
+            </div>
+        </div>
+
+        <div id="postsSection" class="content-section">
+            <div style="max-width: 750px; margin: 0 auto;">
+                <h2 style="color: var(--accent-color); margin-bottom: 25px; text-align: center;">لوحة إعلانات ومنشورات المسجد</h2>
+                <div id="publicPostsContainer"></div>
+            </div>
+        </div>
+
+        <div id="honorSection" class="content-section">
+            <div style="max-width: 950px; margin: 0 auto;">
+                <h2 style="color: var(--accent-color); margin-bottom: 8px; text-align: center; font-size: 2rem; text-shadow: 0 2px 8px rgba(241,196,15,0.4);">🌟 لوحة شرف الخاتمين لكتاب الله 🌟</h2>
+                <p style="text-align: center; color: #cbd5e1; margin-bottom: 35px;">انقر على بطاقة الطالب لعرض وطباعة دعوة التكريم الرسمية الخاصة به</p>
+                <div id="honorWallContainer" class="honor-wall"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="color: var(--accent-color); margin-bottom: 20px; text-align: center;">العنوان</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="invitationModal" class="modal">
+        <div class="modal-content" style="max-width: 820px;">
+            <span class="close-btn no-print" onclick="closeInvitationModal()">&times;</span>
+            <div id="printableInvitation" class="invitation-document">
+                <div class="invitation-header">
+                    <h1 id="invMosqueNameHeader">-</h1>
+                    <h2 style="color: #0f4c3a; font-size: 1.2rem; margin-top: 5px;" id="invMosqueLocationHeader">-</h2>
+                    <h3 style="color: #d4af37; font-size: 1.3rem; margin-top: 10px;">🌟 شهادة ودعوة تكريم خاتم القرآن الكريم 🌟</h3>
+                </div>
+                <div class="invitation-body">
+                    <p>تشهد إدارة المسجد رفقة الأستاذ المشرف بأن الطالب المتميز:</p>
+                    <p style="background: #fffdf0; padding: 15px; border-right: 5px solid #d4af37; border-radius: 4px; text-align: center;">
+                        <strong style="font-size: 1.3rem; color: #d4af37;" id="invStudentName">-</strong><br>
+                        <span style="font-size: 1rem; color: #555;">تحت إشراف الأستاذ: <b id="invProfessorName">-</b></span>
+                    </p>
+                    <p>قد أتم بفضل الله وتوفيقه حفظ كتاب الله عز وجل كاملاً (60 حزباً) إتقاناً وتجويداً. وعليه، فإن إدارة المسجد يسرها دعوة الطالب وعائلته الكريمة لحضور حفل التكريم السنوي لفرسان القرآن.</p>
+                </div>
+                <div class="invitation-signatures">
+                    <div class="signature-box" style="width: 40%;">إمضاء وختم الأستاذ المشرف</div>
+                    <div class="signature-box" style="width: 40%;">إمضاء وختم إدارة المسجد</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px;" class="no-print">
+                <button class="btn" style="width: auto; padding: 12px 35px;" onclick="window.print()">🖨️ طباعة دعوة التكريم</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="summonsModal" class="modal">
+        <div class="modal-content" style="max-width: 820px;">
+            <span class="close-btn no-print" onclick="closeSummonsModal()">&times;</span>
+            <div id="printableSummons" class="summons-document">
+                <div class="summons-header">
+                    <h1 id="sumMosqueNameHeader">-</h1>
+                    <h2 style="color: #0f4c3a; font-size: 1.2rem; margin-top: 5px;" id="sumMosqueLocationHeader">-</h2>
+                    <h3 style="color: var(--accent-color); font-size: 1.1rem; margin-top: 10px;">استدعاء رسمي للالتحاق بحلقة تحفيظ القرآن الكريم</h3>
+                </div>
+                <div class="summons-body">
+                    <p>تشهد إدارة المسجد بأن الطالب المترشح:</p>
+                    <p style="background: #fcfdfd; padding: 15px; border-right: 4px solid #0f4c3a; border-radius: 4px; color: #333;">
+                        <strong>الاسم واللقب:</strong> <span id="summonsStudentName">-</span><br>
+                        <strong>حلقة الأستاذ المشرف:</strong> <span id="summonsProfessorName">-</span><br>
+                        <strong>رقم الترتيب التسلسلي في القائمة:</strong> <span id="summonsStudentRank" style="color: #0f4c3a; font-weight: bold;">-</span>
+                    </p>
+                    <p>قد تم قبول طلبه رسمياً للانضمام إلى حلقات المسجد. وعليه، يُرجى التقدم بالحضور في المواعيد المحددة مع جلب هذا الاستدعاء ممضياً.</p>
+                </div>
+                <div class="summons-signatures">
+                    <div class="signature-box" style="width: 30%;">إمضاء الطالب</div>
+                    <div class="signature-box" style="width: 30%;">إمضاء ولي الأمر</div>
+                    <div class="signature-box" style="width: 30%;">إمضاء وختم الأستاذ</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px;" class="no-print">
+                <button class="btn" style="width: auto; padding: 12px 35px;" onclick="window.print()">🖨️ طباعة الاستدعاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setupMosque(event) {
+            event.preventDefault();
+            const name = document.getElementById('setupMosqueName').value;
+            const location = document.getElementById('setupMosqueLocation').value;
+            const code = document.getElementById('setupMosqueCode').value;
+            const confirmCode = document.getElementById('setupMosqueCodeConfirm').value;
+
+            if (code !== confirmCode) {
+                alert("كود الدخول غير متطابق. يرجى إعادة التأكيد بشكل صحيح.");
+                return;
+            }
+
+            const mosqueInfo = { name, location, code };
+            localStorage.setItem('mosqueGeneralInfo', JSON.stringify(mosqueInfo));
+
+            document.getElementById('mosqueSetupScreen').style.display = 'none';
+            applyMosqueInfo();
+            alert("تم إعداد بيانات المسجد بنجاح!");
+        }
+
+        function checkMosqueSetup() {
+            const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
+            if (!info) {
+                document.getElementById('mosqueSetupScreen').style.display = 'flex';
+            } else {
+                document.getElementById('mosqueSetupScreen').style.display = 'none';
+                applyMosqueInfo();
+            }
+        }
+
+        function logoutMosqueSetup() {
+            if (confirm("هل أنت متأكد من تسجيل الخروج؟ سيتم إخفاء بيانات المسجد الحالية والعودة لشاشة التسجيل.")) {
+                localStorage.removeItem('mosqueGeneralInfo');
+                localStorage.removeItem('adminAuthorized');
+                location.reload();
+            }
+        }
+
+        function applyMosqueInfo() {
+            const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
+            if (info) {
+                document.getElementById('sidebarMosqueName').innerText = info.name;
+                document.getElementById('sidebarMosqueLocation').innerText = info.location;
+                document.getElementById('headerMosqueDisplay').innerText = info.name;
+
+                document.getElementById('invMosqueNameHeader').innerText = info.name;
+                document.getElementById('invMosqueLocationHeader').innerText = info.location;
+                document.getElementById('sumMosqueNameHeader').innerText = info.name;
+                document.getElementById('sumMosqueLocationHeader').innerText = info.location;
+            }
+        }
+
+        function switchTab(tab) {
+            if (tab === 'admin') {
+                const isAuth = sessionStorage.getItem('adminAuthorized');
+                if (isAuth === 'true') {
+                    openAdminSectionDirectly();
+                } else {
+                    document.getElementById('adminAuthModal').style.display = 'flex';
+                    return;
+                }
+            } else {
+                document.getElementById('studentSection').classList.remove('active');
+                document.getElementById('professorSection').classList.remove('active');
+                document.getElementById('adminSection').classList.remove('active');
+                document.getElementById('postsSection').classList.remove('active');
+                document.getElementById('honorSection').classList.remove('active');
+
+                document.getElementById('navStudent').classList.remove('active');
+                document.getElementById('navProfessor').classList.remove('active');
+                document.getElementById('navAdmin').classList.remove('active');
+                document.getElementById('navPosts').classList.remove('active');
+                document.getElementById('navHonor').classList.remove('active');
+
+                if (tab === 'student') {
+                    document.getElementById('studentSection').classList.add('active');
+                    document.getElementById('navStudent').classList.add('active');
+                    document.getElementById('headerTitle').innerText = "بوابة الطالب الذكية";
+                    loadStudentProfessorsDropdown();
+                    checkStudentStatusUI();
+                    loadPrayerTimesUI();
+                } else if (tab === 'professor') {
+                    document.getElementById('professorSection').classList.add('active');
+                    document.getElementById('navProfessor').classList.add('active');
+                    document.getElementById('headerTitle').innerText = "لوحة تحكم الأستاذ";
+                    checkProfessorSession();
+                    loadPrayerTimesUI();
+                } else if (tab === 'posts') {
+                    document.getElementById('postsSection').classList.add('active');
+                    document.getElementById('navPosts').classList.add('active');
+                    document.getElementById('headerTitle').innerText = "منشورات وتعاميم المسجد";
+                    loadPublicPosts();
+                } else if (tab === 'honor') {
+                    document.getElementById('honorSection').classList.add('active');
+                    document.getElementById('navHonor').classList.add('active');
+                    document.getElementById('headerTitle').innerText = "لوحة شرف الخاتمين";
+                    loadHonorWall();
+                }
+            }
+        }
+
+        function verifyAdminAccess(event) {
+            event.preventDefault();
+            const enteredCode = document.getElementById('adminEnteredCode').value;
+            const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
+
+            if (info && enteredCode === info.code) {
+                sessionStorage.setItem('adminAuthorized', 'true');
+                document.getElementById('adminAuthModal').style.display = 'none';
+                document.getElementById('adminEnteredCode').value = '';
+                openAdminSectionDirectly();
+                alert("تم التحقق بنجاح! مرحباً بك في لوحة تحكم الإدارة.");
+            } else {
+                alert("كود المسجد غير صحيح! يرجى إدخال الكود الصحيح للوصول إلى الإدارة.");
+            }
+        }
+
+        function cancelAdminAccess() {
+            document.getElementById('adminAuthModal').style.display = 'none';
+            document.getElementById('adminEnteredCode').value = '';
+        }
+
+        function openAdminSectionDirectly() {
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('professorSection').classList.remove('active');
+            document.getElementById('adminSection').classList.add('active');
+            document.getElementById('postsSection').classList.remove('active');
+            document.getElementById('honorSection').classList.remove('active');
+            
+            document.getElementById('navStudent').classList.remove('active');
+            document.getElementById('navProfessor').classList.remove('active');
+            document.getElementById('navAdmin').classList.add('active');
+            document.getElementById('navPosts').classList.remove('active');
+            document.getElementById('navHonor').classList.remove('active');
+
+            document.getElementById('headerTitle').innerText = "لوحة تحكم الإدارة المحمية";
+            loadAdminData();
+            loadPrayerTimesUI();
+        }
+
+        function lockAdminDashboard() {
+            sessionStorage.removeItem('adminAuthorized');
+            switchTab('student');
+            alert("تم قفل لوحة تحكم الإدارة بنجاح.");
+        }
+
+        function savePrayerTimes(event) {
+            event.preventDefault();
+            const prayerTimes = {
+                fajr: document.getElementById('prayerFajr').value,
+                dhuhr: document.getElementById('prayerDhuhr').value,
+                asr: document.getElementById('prayerAsr').value,
+                maghrib: document.getElementById('prayerMaghrib').value,
+                isha: document.getElementById('prayerIsha').value
+            };
+
+            localStorage.setItem('mosquePrayerTimes', JSON.stringify(prayerTimes));
+            loadPrayerTimesUI();
+            alert("تم تحديث مواقيت الصلاة ونشرها في صفحة الطالب والأستاذ بنجاح!");
+        }
+
+        function loadPrayerTimesUI() {
+            const savedTimes = JSON.parse(localStorage.getItem('mosquePrayerTimes'));
+            let htmlContent = `<p style="color: #94a3b8; width: 100%; text-align: center;">لم تقم الإدارة بتحديد المواقيت بعد.</p>`;
+            
+            if (savedTimes) {
+                htmlContent = `
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>الفجر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.fajr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>الظهر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.dhuhr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>العصر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.asr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>المغرب</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.maghrib}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>العشاء</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.isha}</span></div>
+                `;
+            }
+
+            const studentContainer = document.getElementById('displayPrayerStudent');
+            if (studentContainer) studentContainer.innerHTML = htmlContent;
+
+            const professorContainer = document.getElementById('displayPrayerProfessor');
+            if (professorContainer) professorContainer.innerHTML = htmlContent;
+
+            if (savedTimes && document.getElementById('prayerFajr')) {
+                document.getElementById('prayerFajr').value = savedTimes.fajr || '';
+                document.getElementById('prayerDhuhr').value = savedTimes.dhuhr || '';
+                document.getElementById('prayerAsr').value = savedTimes.asr || '';
+                document.getElementById('prayerMaghrib').value = savedTimes.maghrib || '';
+                document.getElementById('prayerIsha').value = savedTimes.isha || '';
+            }
+        }
+
+        function updateStatsCircles() {
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+
+            document.getElementById('statProfCount').innerText = professors.length;
+            document.getElementById('statStudentCount').innerText = students.length;
+        }
+
+        function openProfessorsModal() {
+            const modal = document.getElementById('statsModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerText = "قائمة أساتذة المسجد وأكوادهم وعدد طلبتهم";
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+
+            if (professors.length === 0) {
+                modalBody.innerHTML = `<p style="text-align: center; color: #94a3b8;">لا توجد أساتذة مسجلين حالياً.</p>`;
+            } else {
+                let html = `<table><thead><tr><th>اسم الأستاذ</th><th>التخصص</th><th>كود الدخول السري</th><th>عدد الطلبة المسجلين لديه</th></tr></thead><tbody>`;
+                professors.forEach(prof => {
+                    const count = students.filter(s => s.professor === prof.name).length;
+                    html += `<tr><td><b>${prof.name}</b></td><td>${prof.specialty}</td><td><span style="background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 8px; font-family: monospace; font-weight: bold; color: var(--accent-color);">${prof.code}</span></td><td><span style="color: var(--accent-color); font-weight: bold;">${count} طلاب</span></td></tr>`;
+                });
+                html += `</tbody></table>`;
+                modalBody.innerHTML = html;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function openStudentsModal() {
+            const modal = document.getElementById('statsModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerText = "قائمة جميع الطلاب وحالتهم الدراسية";
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+
+            if (students.length === 0) {
+                modalBody.innerHTML = `<p style="text-align: center; color: #94a3b8;">لا توجد طلاب مسجلين حالياً.</p>`;
+            } else {
+                let html = `<table><thead><tr><th>الترتيب</th><th>اسم الطالب</th><th>العمر</th><th>الأستاذ المدرس</th><th>الأحزاب</th><th>الحالة</th></tr></thead><tbody>`;
+                students.forEach((student, idx) => {
+                    let nameDisplay = student.hizbCount >= 60 ? `<span style="color: var(--accent-color); font-weight: bold;">👑 ${student.name} (خاتم)</span>` : `<b>${student.name}</b>`;
+                    html += `<tr><td><b>#${idx + 1}</b></td><td>${nameDisplay}</td><td>${student.age} سنة</td><td>${student.professor || 'غير موجه'}</td><td>${student.hizbCount || 0} حزب</td><td><b style="color: ${student.status === 'مقبول' ? '#2ecc71' : '#e67e22'}">${student.status}</b></td></tr>`;
+                });
+                html += `</tbody></table>`;
+                modalBody.innerHTML = html;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('statsModal').style.display = 'none'; }
+        
+        function openInvitationModalByName(studentName) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                document.getElementById('invStudentName').innerText = student.name;
+                document.getElementById('invProfessorName').innerText = student.professor || 'غير محدد';
+                document.getElementById('invitationModal').style.display = 'flex';
+            }
+        }
+        function closeInvitationModal() { document.getElementById('invitationModal').style.display = 'none'; }
+        
+        function openSummonsModal() {
+            const currentName = localStorage.getItem('currentStudentName');
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            const studentIdx = students.findIndex(s => s.name === currentName);
+
+            if (studentIdx !== -1) {
+                const student = students[studentIdx];
+                document.getElementById('summonsStudentName').innerText = student.name;
+                document.getElementById('summonsProfessorName').innerText = student.professor;
+                document.getElementById('summonsStudentRank').innerText = `#${studentIdx + 1}`;
+                document.getElementById('summonsModal').style.display = 'flex';
+            }
+        }
+        function closeSummonsModal() { document.getElementById('summonsModal').style.display = 'none'; }
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('statsModal')) document.getElementById('statsModal').style.display = 'none';
+            if (event.target === document.getElementById('summonsModal')) document.getElementById('summonsModal').style.display = 'none';
+            if (event.target === document.getElementById('invitationModal')) document.getElementById('invitationModal').style.display = 'none';
+            if (event.target === document.getElementById('adminAuthModal')) document.getElementById('adminAuthModal').style.display = 'none';
+        }
+
+        function savePostForm(event) {
+            event.preventDefault();
+            const title = document.getElementById('postTitleInput').value;
+            const content = document.getElementById('postContentInput').value;
+            const editIndex = parseInt(document.getElementById('editPostIndex').value);
+            const date = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+
+            if (editIndex === -1) {
+                posts.unshift({ title, content, date });
+                alert("تم نشر المنشور بنجاح!");
+            } else {
+                posts[editIndex].title = title;
+                posts[editIndex].content = content;
+                posts[editIndex].date = date + " (معدل)";
+                alert("تم تحديث المنشور بنجاح!");
+                cancelEditPost();
+            }
+
+            localStorage.setItem('mosquePosts', JSON.stringify(posts));
+            document.getElementById('postForm').reset();
+            loadAdminData();
+        }
+
+        function editPost(index) {
+            let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+            const post = posts[index];
+
+            document.getElementById('postTitleInput').value = post.title;
+            document.getElementById('postContentInput').value = post.content;
+            document.getElementById('editPostIndex').value = index;
+
+            document.getElementById('postFormHeading').innerText = "تعديل منشور المسجد";
+            document.getElementById('postSubmitBtn').innerText = "حفظ التعديلات";
+            document.getElementById('postCancelBtn').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEditPost() {
+            document.getElementById('postForm').reset();
+            document.getElementById('editPostIndex').value = "-1";
+            document.getElementById('postFormHeading').innerText = "نشر تعاميم ومنشورات المسجد العامة";
+            document.getElementById('postSubmitBtn').innerText = "نشر وإرسال للجميع";
+            document.getElementById('postCancelBtn').style.display = 'none';
+        }
+
+        function deletePost(index) {
+            if (confirm("هل أنت متأكد من حذف هذا المنشور نهائياً؟")) {
+                let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+                posts.splice(index, 1);
+                localStorage.setItem('mosquePosts', JSON.stringify(posts));
+                loadAdminData();
+            }
+        }
+
+        function loadPublicPosts() {
+            const container = document.getElementById('publicPostsContainer');
+            container.innerHTML = '';
+            let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+
+            if (posts.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #94a3b8;">لا توجد منشورات أو تعاميم حالياً.</p>`;
+                return;
+            }
+
+            posts.forEach(post => {
+                container.innerHTML += `<div class="post-card"><h3>📢 ${post.title}</h3><p>${post.content}</p><div class="post-date">تاريخ النشر: ${post.date}</div></div>`;
+            });
+        }
+
+        function loadHonorWall() {
+            const container = document.getElementById('honorWallContainer');
+            container.innerHTML = '';
+
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            const khatimun = students.filter(s => s.status === 'مقبول' && parseInt(s.hizbCount) >= 60);
+
+            if (khatimun.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #94a3b8; grid-column: 1 / -1; padding: 30px;">لم يتم تسجيل طلاب خاتمين للقرآن الكريم حتى الآن. ترقبوا قريباً فرسان القرآن!</p>`;
+                return;
+            }
+
+            khatimun.forEach(student => {
+                container.innerHTML += `<div class="honor-card" onclick="openInvitationModalByName('${student.name}')"><div class="honor-name">${student.name}</div><div class="honor-prof">الأستاذ المشرف: ${student.professor}</div><div class="honor-badge">انقر لعرض دعوة التكريم 📜</div></div>`;
+            });
+        }
+
+        function loadStudentProfessorsDropdown() {
+            const selectDropdown = document.getElementById('studentPreferredProf');
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+
+            selectDropdown.innerHTML = '<option value="" disabled selected style="background: #082d22;">اختر الأستاذ المناسب لحلقتك</option>';
+            if (professors.length === 0) {
+                selectDropdown.innerHTML = '<option value="" disabled selected style="background: #082d22;">لا توجد أساتذة متاحين حالياً</option>';
+                return;
+            }
+
+            professors.forEach(prof => {
+                selectDropdown.innerHTML += `<option value="${prof.name}" style="background: #082d22;">${prof.name} (${prof.specialty})</option>`;
+            });
+        }
+
+        function registerStudent(event) {
+            event.preventDefault();
+            const name = document.getElementById('studentName').value;
+            const age = parseInt(document.getElementById('studentAge').value);
+            const level = document.getElementById('studentLevel').value;
+            const preferredProf = document.getElementById('studentPreferredProf').value;
+
+            if (age < 6) {
+                alert("عذراً، الحد الأدنى للتسجيل في حلقات المسجد هو 6 سنوات. لا يمكن إتمام التسجيل.");
+                return;
+            }
+
+            const newStudent = { name, age, level, professor: preferredProf, status: 'قيد الانتظار', hizbCount: 0, attendance: 'لم يسجل', notes: 'لم تُكتب ملاحظات بعد' };
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students.push(newStudent);
+            localStorage.setItem('mosqueStudents', JSON.stringify(students));
+            localStorage.setItem('currentStudentName', name);
+
+            document.getElementById('studentForm').reset();
+            checkStudentStatusUI();
+            alert("تم إرسال طلبك بنجاح، وهو بانتظار موافقة الإدارة.");
+        }
+
+        function checkStudentStatusUI() {
+            const form = document.getElementById('studentRegistrationCard');
+            const badge = document.getElementById('successBadge');
+            const reportCard = document.getElementById('studentReportCard');
+            const congratsCard = document.getElementById('khatimCongratsCard');
+            const currentName = localStorage.getItem('currentStudentName');
+
+            if (!currentName) {
+                form.style.display = 'block';
+                badge.style.display = 'none';
+                reportCard.style.display = 'none';
+                return;
+            }
+
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            const studentIdx = students.findIndex(s => s.name === currentName);
+
+            if (studentIdx !== -1) {
+                const student = students[studentIdx];
+                if (student.status === 'مقبول') {
+                    form.style.display = 'none';
+                    reportCard.style.display = 'block';
+                    
+                    if (parseInt(student.hizbCount) >= 60) {
+                        congratsCard.style.display = 'block';
+                    } else {
+                        congratsCard.style.display = 'none';
+                    }
+
+                    document.getElementById('viewStudentProf').innerText = student.professor;
+                    document.getElementById('viewStudentRank').innerText = `#${studentIdx + 1}`;
+                    document.getElementById('viewStudentHizb').innerText = student.hizbCount || 0;
+                    document.getElementById('viewStudentAttendance').innerText = student.attendance || 'لم يسجل';
+                    document.getElementById('viewStudentAttendance').style.color = student.attendance === 'حاضر' ? '#2ecc71' : (student.attendance === 'غائب' ? '#e74c3c' : '#94a3b8');
+                    document.getElementById('viewStudentNotes').innerText = student.notes || 'لا توجد ملاحظات';
+                } else {
+                    form.style.display = 'block';
+                    badge.style.display = 'block';
+                    badge.innerHTML = `⏳ طلبك قيد المراجعة لدى الإدارة حالياً.`;
+                    reportCard.style.display = 'none';
+                }
+            }
+        }
+
+        function registerProfessor(event) {
+            event.preventDefault();
+            const name = document.getElementById('profName').value;
+            const specialty = document.getElementById('profSpecialty').value;
+            const code = document.getElementById('profCode').value;
+
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            professors.push({ name, specialty, code });
+            localStorage.setItem('mosqueProfessors', JSON.stringify(professors));
+
+            document.getElementById('professorRegisterForm').reset();
+            loadAdminData();
+            alert("تمت إضافة الأستاذ وكود الدخول السري بنجاح!");
+        }
+
+        function verifyProfessorLogin(event) {
+            event.preventDefault();
+            const enteredCode = document.getElementById('profAccessCode').value;
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            const matchedProf = professors.find(p => p.code === enteredCode);
+
+            if (matchedProf) {
+                localStorage.setItem('loggedInProfName', matchedProf.name);
+                checkProfessorSession();
+            } else {
+                alert("كود الدخول غير صحيح. يرجى مراجعة الإدارة.");
+            }
+        }
+
+        function checkProfessorSession() {
+            const loggedInProf = localStorage.getItem('loggedInProfName');
+            const loginCard = document.getElementById('professorLoginCard');
+            const dashboard = document.getElementById('professorDashboard');
+
+            if (loggedInProf) {
+                loginCard.style.display = 'none';
+                dashboard.style.display = 'block';
+                document.getElementById('loggedInProfName').innerText = loggedInProf;
+                loadProfessorTable(loggedInProf);
+            } else {
+                loginCard.style.display = 'block';
+                dashboard.style.display = 'none';
+                document.getElementById('profAccessCode').value = '';
+            }
+        }
+
+        function professorLogout() {
+            localStorage.removeItem('loggedInProfName');
+            checkProfessorSession();
+        }
+
+        function loadProfessorTable(profName) {
+            const tableBody = document.getElementById('profTableBody');
+            tableBody.innerHTML = '';
+
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            let myStudents = [];
+            students.forEach((s, idx) => {
+                if (s.status === 'مقبول' && s.professor === profName) {
+                    myStudents.push({ ...s, originalIndex: idx + 1 });
+                }
+            });
+
+            if (myStudents.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8;">لا توجد طلاب مقبولة في حلقتك حالياً.</td></tr>`;
+                return;
+            }
+
+            myStudents.forEach((student) => {
+                let globalIndex = students.findIndex(s => s.name === student.name);
+                let attColor = student.attendance === 'حاضر' ? '#2ecc71' : (student.attendance === 'غائب' ? '#e74c3c' : '#94a3b8');
+                let isKhatim = parseInt(student.hizbCount) >= 60;
+                let nameStyle = isKhatim ? 'color: var(--accent-color); font-weight: bold;' : '';
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><b style="color: var(--accent-color);">#${student.originalIndex}</b></td>
+                        <td><span style="${nameStyle}">${student.name} ${isKhatim ? '👑 (خاتم)' : ''}</span></td>
+                        <td>${student.age} سنة</td>
+                        <td>${student.level}</td>
+                        <td><input type="number" id="hizb-${globalIndex}" value="${student.hizbCount || 0}" min="0" max="60" style="width: 70px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color:#fff;"></td>
+                        <td><input type="text" id="notes-${globalIndex}" value="${student.notes !== 'لم تُكتب ملاحظات بعد' ? student.notes : ''}" placeholder="اكتب ملاحظة..." style="width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color:#fff;"></td>
+                        <td>
+                            <button class="btn-success" style="padding: 5px 10px;" onclick="setAttendance(${globalIndex}, 'حاضر')">حاضر</button>
+                            <button class="btn-danger" style="padding: 5px 10px; margin-right: 5px;" onclick="setAttendance(${globalIndex}, 'غائب')">غائب</button>
+                            <span style="display: block; margin-top: 5px; font-size: 0.85rem; color: ${attColor}">الحالة: <b>${student.attendance || 'لم يسجل'}</b></span>
+                        </td>
+                        <td><button class="btn-info" onclick="sendStudentReport(${globalIndex})">حفظ التقرير</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setAttendance(globalIndex, statusType) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[globalIndex].attendance = statusType;
+            localStorage.setItem('mosqueStudents', JSON.stringify(students));
+            loadProfessorTable(localStorage.getItem('loggedInProfName'));
+            alert(`تم تسجيل حالة الطالب كـ (${statusType}) بنجاح.`);
+        }
+
+        function sendStudentReport(globalIndex) {
+            const hizbVal = parseInt(document.getElementById(`hizb-${globalIndex}`).value);
+            const notesVal = document.getElementById(`notes-${globalIndex}`).value;
+
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[globalIndex].hizbCount = hizbVal;
+            students[globalIndex].notes = notesVal ? notesVal : 'لا توجد ملاحظات';
+
+            localStorage.setItem('mosqueStudents', JSON.stringify(students));
+            loadProfessorTable(localStorage.getItem('loggedInProfName'));
+
+            if (hizbVal >= 60) {
+                alert("🏆 مبروك! لقد أتم الطالب 60 حزباً، وتم إضافته تلقائياً إلى لوحة شرف الخاتمين وتفعيل دعوة التكريم!");
+            } else {
+                alert("تم حفظ التقرير بنجاح!");
+            }
+        }
+
+        function loadAdminData() {
+            updateStatsCircles();
+            loadPrayerTimesUI();
+
+            const postsContainer = document.getElementById('adminPostsListContainer');
+            postsContainer.innerHTML = '';
+            let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+
+            if (posts.length === 0) {
+                postsContainer.innerHTML = `<p style="text-align: center; color: #94a3b8;">لا توجد منشورات حالياً.</p>`;
+            } else {
+                let postsHtml = `<table><thead><tr><th>عنوان المنشور</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>`;
+                posts.forEach((post, index) => {
+                    postsHtml += `<tr><td><b>${post.title}</b></td><td>${post.date}</td><td><button class="btn-warning" style="padding: 4px 10px; font-size: 0.8rem;" onclick="editPost(${index})">تعديل</button> <button class="btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="deletePost(${index})">حذف</button></td></tr>`;
+                });
+                postsHtml += `</tbody></table>`;
+                postsContainer.innerHTML = postsHtml;
+            }
+
+            const container = document.getElementById('adminProfessorsListContainer');
+            container.innerHTML = '';
+
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+
+            if (professors.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #94a3b8;">لا توجد أساتذة مسجلين في المسجد حالياً.</p>`;
+                return;
+            }
+
+            professors.forEach((prof, pIndex) => {
+                let studentsRows = '';
+                let profStudentsCount = 0;
+
+                students.forEach((student, globalIndex) => {
+                    if (student.professor === prof.name) {
+                        profStudentsCount++;
+                        let attColor = student.attendance === 'حاضر' ? '#2ecc71' : (student.attendance === 'غائب' ? '#e74c3c' : '#94a3b8');
+                        let isKhatim = parseInt(student.hizbCount) >= 60;
+                        let studentDisplayName = isKhatim ? `<span style="color: var(--accent-color); font-weight: bold;">👑 ${student.name} (خاتم)</span>` : student.name;
+
+                        studentsRows += `
+                            <tr>
+                                <td><b style="color: var(--accent-color);">#${globalIndex + 1}</b></td>
+                                <td>${studentDisplayName}</td>
+                                <td>${student.age} سنة</td>
+                                <td>${student.level}</td>
+                                <td><b style="color: var(--accent-color);">${student.hizbCount || 0} حزب</b></td>
+                                <td><span style="color: ${attColor}; font-weight: bold;">${student.attendance || 'لم يسجل'}</span></td>
+                                <td style="max-width: 150px; word-break: break-word;">${student.notes || '-'}</td>
+                                <td><b style="color: ${student.status === 'مقبول' ? '#2ecc71' : '#e67e22'}">${student.status}</b></td>
+                                <td>
+                                    ${student.status === 'قيد الانتظار' ? `<button class="btn-success" onclick="acceptStudent(${globalIndex})">قبول</button>` : ''}
+                                    <button class="btn-danger" onclick="deleteStudent(${globalIndex})">حذف</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                if (profStudentsCount === 0) {
+                    studentsRows = `<tr><td colspan="9" style="text-align: center; color: #94a3b8;">لا توجد طلاب مسجلين في هذه الحلقة.</td></tr>`;
+                }
+
+                container.innerHTML += `
+                    <div class="professor-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="color: var(--accent-color);">حلقة الأستاذ: ${prof.name} (${prof.specialty}) - <span style="font-size: 0.9rem; color: #cbd5e1;">الكود: <b>${prof.code}</b></span></h3>
+                            <button class="btn-danger" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="deleteProfessor(${pIndex})">حذف الأستاذ</button>
+                        </div>
+                        <table><thead><tr><th>الترتيب</th><th>اسم الطالب</th><th>العمر</th><th>المستوى</th><th>الأحزاب</th><th>الحضور</th><th>ملاحظات</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody>${studentsRows}</tbody></table>
+                    </div>
+                `;
+            });
+        }
+
+        function acceptStudent(index) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[index].status = 'مقبول';
+            localStorage.setItem('mosqueStudents', JSON.stringify(students));
+            loadAdminData();
+            alert("تم قبول الطالب بنجاح وإصدار استدعاء القبول الخاص به!");
+        }
+
+        function deleteStudent(index) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students.splice(index, 1);
+            localStorage.setItem('mosqueStudents', JSON.stringify(students));
+            loadAdminData();
+        }
+
+        function deleteProfessor(index) {
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            professors.splice(index, 1);
+            localStorage.setItem('mosqueProfessors', JSON.stringify(professors));
+            loadAdminData();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkMosqueSetup();
+            loadStudentProfessorsDropdown();
+            updateStatsCircles();
+            loadPrayerTimesUI();
+        });
+    </script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAI4p4UcS3Un684MlhtNZX3w2UUyUBr2q4",
+    authDomain: "masdjidy-ac957.firebaseapp.com",
+    projectId: "masdjidy-ac957",
+    storageBucket: "masdjidy-ac957.firebasestorage.app",
+    messagingSenderId: "496984308421",
+    appId: "1:496984308421:web:7e6910419eeea28f3f8eac",
+    measurementId: "G-L9YZPTXGYV"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+ </script>
+</body>
+</html>
