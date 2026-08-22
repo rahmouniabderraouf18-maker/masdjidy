@@ -1717,9 +1717,18 @@ window.addEventListener('DOMContentLoaded', () => {
     updateStatsCircles();
     loadPrayerTimesUI();
 });
-    
     </script>
+    
    <script type="module">
+       // تحقق مما إذا تم إعداد المسجد مسبقاً لإخفاء نموذج الإعدادات وعرض المنصة
+document.addEventListener("DOMContentLoaded", function() {
+    const isSetup = localStorage.getItem('isMosqueSetup');
+    const setupForm = document.querySelector("form"); // أو الـ div الخاص بنموذج الإعدادات
+
+    if (isSetup === 'true' && setupForm) {
+        setupForm.style.display = 'none'; // إخفاء نموذج التسجيل لإظهار المنصة
+    }
+});
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
