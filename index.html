@@ -1748,46 +1748,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ربط زر الحفظ بقاعدة البيانات (تأكد أن زر الحفظ لديك لديه id باسم saveBtn أو استبدله بما يناسبك)
-const saveBtn = document.getElementById("saveBtn");
-
-if (saveBtn) {
-    saveBtn.addEventListener("click", function() {
-        // قراءة الحقول بالـ IDs الصحيحة
-        const mosqueName = document.getElementById("setupMosqueName").value.trim();
-        const mosqueLocation = document.getElementById("setupMosqueLocation").value.trim();
-        const mosquePin = document.getElementById("setupMosqueCode").value.trim();
-        const mosquePinConfirm = document.getElementById("setupMosqueCodeConfirm").value.trim();
-
-        // التحقق من تعبئة الحقول
-        if (!mosqueName || !mosqueLocation || !mosquePin || !mosquePinConfirm) {
-            alert("الرجاء ملء جميع الحقول!");
-            return;
-        }
-
-        // التحقق من تطابق كود الدخول
-        if (mosquePin !== mosquePinConfirm) {
-            alert("كود الدخول السري غير متطابق!");
-            return;
-        }
-
-        // حفظ البيانات في Realtime Database
-        set(ref(db, 'masjidConfig/'), {
-            name: mosqueName,
-            location: mosqueLocation,
-            pin: mosquePin
-        })
-      .then(() => {
-    localStorage.setItem('mosqueName', mosqueName);
-    localStorage.setItem('mosqueLocation', mosqueLocation);
-    localStorage.setItem('mosquePin', mosquePin);
-    localStorage.setItem('isMosqueSetup', 'true');
-
-    alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
-
-    // إعادة تحميل الصفحة، وسيقوم الكود الذي وضعناه في الأعلى بإخفاء الإعدادات وإظهار واجهة المنصة تلقائياً
-    window.location.reload();
-})
 </script>
  
 </body>
