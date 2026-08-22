@@ -904,25 +904,37 @@
     </div>
 
     <script>
-        function setupMosque(event) {
-            event.preventDefault();
-            const name = document.getElementById('setupMosqueName').value;
-            const location = document.getElementById('setupMosqueLocation').value;
-            const code = document.getElementById('setupMosqueCode').value;
-            const confirmCode = document.getElementById('setupMosqueCodeConfirm').value;
+       function setupMosque(event) {
+    event.preventDefault();
+    const name = document.getElementById('setupMosqueName').value;
+    const location = document.getElementById('setupMosqueLocation').value;
+    const code = document.getElementById('setupMosqueCode').value;
+    const confirmCode = document.getElementById('setupMosqueCodeConfirm').value;
 
-            if (code !== confirmCode) {
-                alert("كود الدخول غير متطابق. يرجى إعادة التأكيد بشكل صحيح.");
-                return;
-            }
+    if (code !== confirmCode) {
+        alert("كود الدخول غير متطابق. يرجى إعادة التأكيد بشكل صحيح.");
+        return;
+    }
 
-            const mosqueInfo = { name, location, code };
-            localStorage.setItem('mosqueGeneralInfo', JSON.stringify(mosqueInfo));
+    // حفظ البيانات في Firebase Realtime Database
+    set(ref(db, 'masjidConfig/'), {
+        name: name,
+        location: location,
+        code: code
+    })
+    .then(() => {
+        // الاحتفاظ بنسخة محلية لتسريع عمل الواجهة
+        const mosqueInfo = { name, location, code };
+        localStorage.setItem('mosqueGeneralInfo', JSON.stringify(mosqueInfo));
 
-            document.getElementById('mosqueSetupScreen').style.display = 'none';
-            applyMosqueInfo();
-            alert("تم إعداد بيانات المسجد بنجاح!");
-        }
+        document.getElementById('mosqueSetupScreen').style.display = 'none';
+        applyMosqueInfo();
+        alert("تم إعداد وحفظ بيانات المسجد في قاعدة البيانات بنجاح!");
+    })
+    .catch((error) => {
+        alert("حدث خطأ أثناء الحفظ في قاعدة البيانات: " + error.message);
+    });
+}
 
         function checkMosqueSetup() {
             const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
