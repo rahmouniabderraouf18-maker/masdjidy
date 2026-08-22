@@ -579,7 +579,7 @@
                     <label>تأكيد كود الدخول السري:</label>
                     <input type="password" id="setupMosqueCodeConfirm" placeholder="أعد إدخال الكود للتأكيد" required>
                 </div>
-                <button type="submit" class="btn" style="margin-top: 10px;">حفظ والدخول للمنصة</button>
+               <button type="submit" id="saveBtn" class="btn" style="margin-top: 10px;">حفظ والدخول للمنصة</button>
             </form>
         </div>
     </div>
@@ -1740,7 +1740,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const db = getDatabase(app);
 
     // ربط زر الحفظ بقاعدة البيانات (تأكد أن زر الحفظ لديك لديه id باسم saveBtn أو استبدله بما يناسبك)
-    const saveBtn = document.querySelector("button"); // أو يمكنك استخدام معرف الزر
+  const saveBtn = document.getElementById("saveBtn"); // أو يمكنك استخدام معرف الزر
     if (saveBtn) {
         saveBtn.addEventListener("click", function(e) {
             e.preventDefault();
