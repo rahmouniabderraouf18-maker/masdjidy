@@ -1761,14 +1761,18 @@ window.addEventListener('DOMContentLoaded', () => {
                 name: mosqueName,
                 location: mosqueLocation,
                 pin: mosquePin
-            })
-            .then(() => {
-                alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء الحفظ: " + error.message);
-            });
-        });
+          .then(() => {
+        // تخزين البيانات محلياً لضمان السرعة
+        localStorage.setItem('mosqueName', mosqueName);
+        localStorage.setItem('mosqueLocation', mosqueLocation);
+        localStorage.setItem('mosquePin', mosquePin);
+        localStorage.setItem('isMosqueSetup', 'true');
+
+        alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
+        
+        // الانتقال تلقائياً إلى الصفحة الرئيسية للمنصة
+        window.location.href = 'index.html'; 
+    })
     }
 </script>
  
