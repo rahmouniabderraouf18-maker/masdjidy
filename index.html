@@ -1777,20 +1777,17 @@ if (saveBtn) {
             location: mosqueLocation,
             pin: mosquePin
         })
-        .then(() => {
-            localStorage.setItem('mosqueName', mosqueName);
-            localStorage.setItem('mosqueLocation', mosqueLocation);
-            localStorage.setItem('mosquePin', mosquePin);
-            localStorage.setItem('isMosqueSetup', 'true');
+      .then(() => {
+    localStorage.setItem('mosqueName', mosqueName);
+    localStorage.setItem('mosqueLocation', mosqueLocation);
+    localStorage.setItem('mosquePin', mosquePin);
+    localStorage.setItem('isMosqueSetup', 'true');
 
-            alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
-            window.location.reload();
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء الحفظ: " + error.message);
-        });
-    });
-}
+    alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
+
+    // إعادة تحميل الصفحة، وسيقوم الكود الذي وضعناه في الأعلى بإخفاء الإعدادات وإظهار واجهة المنصة تلقائياً
+    window.location.reload();
+})
 </script>
  
 </body>
