@@ -1743,14 +1743,12 @@ window.addEventListener('DOMContentLoaded', () => {
 const saveBtn = document.getElementById("saveBtn");
 
 if (saveBtn) {
-    saveBtn.addEventListener("click", function(e) {
-        e.preventDefault();
-
-        // قراءة الحقول مباشرة بالـ IDs الموجودة في الـ HTML لديك
-        const mosqueName = document.getElementById("setupMosqueName").value;
-        const mosqueLocation = document.getElementById("setupMosqueLocation").value;
-        const mosquePin = document.getElementById("setupMosqueCode").value;
-        const mosquePinConfirm = document.getElementById("setupMosqueCodeConfirm").value;
+    saveBtn.addEventListener("click", function() {
+        // قراءة الحقول بالـ IDs الصحيحة
+        const mosqueName = document.getElementById("setupMosqueName").value.trim();
+        const mosqueLocation = document.getElementById("setupMosqueLocation").value.trim();
+        const mosquePin = document.getElementById("setupMosqueCode").value.trim();
+        const mosquePinConfirm = document.getElementById("setupMosqueCodeConfirm").value.trim();
 
         // التحقق من تعبئة الحقول
         if (!mosqueName || !mosqueLocation || !mosquePin || !mosquePinConfirm) {
@@ -1760,7 +1758,7 @@ if (saveBtn) {
 
         // التحقق من تطابق كود الدخول
         if (mosquePin !== mosquePinConfirm) {
-            alert("كود الدخول غير متطابق!");
+            alert("كود الدخول السري غير متطابق!");
             return;
         }
 
