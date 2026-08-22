@@ -1740,40 +1740,50 @@ window.addEventListener('DOMContentLoaded', () => {
     const db = getDatabase(app);
 
     // ربط زر الحفظ بقاعدة البيانات (تأكد أن زر الحفظ لديك لديه id باسم saveBtn أو استبدله بما يناسبك)
-  const saveBtn = document.getElementById("saveBtn"); // أو يمكنك استخدام معرف الزر
-    if (saveBtn) {
-        saveBtn.addEventListener("click", function(e) {
-            e.preventDefault();
+const saveBtn = document.getElementById("saveBtn");
 
-            // جلب الحقول بناءً على ترتيبها في صفحتك
-            const inputs = document.querySelectorAll("input");
-            const mosqueName = inputs[0] ? inputs[0].value : "";
-            const mosqueLocation = inputs[1] ? inputs[1].value : "";
-            const mosquePin = inputs[2] ? inputs[2].value : "";
+if (saveBtn) {
+    saveBtn.addEventListener("click", function(e) {
+        e.preventDefault();
 
-            if (!mosqueName || !mosqueLocation || !mosquePin) {
-                alert("الرجاء ملء جميع الحقول!");
-                return;
-            }
+        // قراءة الحقول مباشرة بالـ IDs الموجودة في الـ HTML لديك
+        const mosqueName = document.getElementById("setupMosqueName").value;
+        const mosqueLocation = document.getElementById("setupMosqueLocation").value;
+        const mosquePin = document.getElementById("setupMosqueCode").value;
+        const mosquePinConfirm = document.getElementById("setupMosqueCodeConfirm").value;
 
-            // حفظ البيانات في Realtime Database
-            set(ref(db, 'masjidConfig/'), {
-                name: mosqueName,
-                location: mosqueLocation,
-                pin: mosquePin
-          .then(() => {
-        // تخزين البيانات محلياً لضمان السرعة
-        localStorage.setItem('mosqueName', mosqueName);
-        localStorage.setItem('mosqueLocation', mosqueLocation);
-        localStorage.setItem('mosquePin', mosquePin);
-        localStorage.setItem('isMosqueSetup', 'true');
+        // التحقق من تعبئة الحقول
+        if (!mosqueName || !mosqueLocation || !mosquePin || !mosquePinConfirm) {
+            alert("الرجاء ملء جميع الحقول!");
+            return;
+        }
 
-        alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
-        
-        // الانتقال تلقائياً إلى الصفحة الرئيسية للمنصة
-      window.location.reload();
-    })
-    }
+        // التحقق من تطابق كود الدخول
+        if (mosquePin !== mosquePinConfirm) {
+            alert("كود الدخول غير متطابق!");
+            return;
+        }
+
+        // حفظ البيانات في Realtime Database
+        set(ref(db, 'masjidConfig/'), {
+            name: mosqueName,
+            location: mosqueLocation,
+            pin: mosquePin
+        })
+        .then(() => {
+            localStorage.setItem('mosqueName', mosqueName);
+            localStorage.setItem('mosqueLocation', mosqueLocation);
+            localStorage.setItem('mosquePin', mosquePin);
+            localStorage.setItem('isMosqueSetup', 'true');
+
+            alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
+            window.location.reload();
+        })
+        .catch((error) => {
+            alert("حدث خطأ أثناء الحفظ: " + error.message);
+        });
+    });
+}
 </script>
  
 </body>
