@@ -579,7 +579,7 @@
                     <label>تأكيد كود الدخول السري:</label>
                     <input type="password" id="setupMosqueCodeConfirm" placeholder="أعد إدخال الكود للتأكيد" required>
                 </div>
-               <button type="button" id="saveBtn" class="btn" style="margin-top: 10px;">حفظ والدخول للمنصة</button>
+                <button type="submit" class="btn" style="margin-top: 10px;">حفظ والدخول للمنصة</button>
             </form>
         </div>
     </div>
@@ -904,80 +904,44 @@
     </div>
 
     <script>
-       function setupMosque(event) {
-    event.preventDefault();
-    const name = document.getElementById('setupMosqueName').value;
-    const location = document.getElementById('setupMosqueLocation').value;
-    const code = document.getElementById('setupMosqueCode').value;
-    const confirmCode = document.getElementById('setupMosqueCodeConfirm').value;
+        function setupMosque(event) {
+            event.preventDefault();
+            const name = document.getElementById('setupMosqueName').value;
+            const location = document.getElementById('setupMosqueLocation').value;
+            const code = document.getElementById('setupMosqueCode').value;
+            const confirmCode = document.getElementById('setupMosqueCodeConfirm').value;
 
-    if (code !== confirmCode) {
-        alert("كود الدخول غير متطابق. يرجى إعادة التأكيد بشكل صحيح.");
-        return;
-    }
+            if (code !== confirmCode) {
+                alert("كود الدخول غير متطابق. يرجى إعادة التأكيد بشكل صحيح.");
+                return;
+            }
 
-    // حفظ البيانات في Firebase Realtime Database
-    set(ref(db, 'masjidConfig/'), {
-        name: name,
-        location: location,
-        code: code
-    })
-    .then(() => {
-        // الاحتفاظ بنسخة محلية لتسريع عمل الواجهة
-        const mosqueInfo = { name, location, code };
-        localStorage.setItem('mosqueGeneralInfo', JSON.stringify(mosqueInfo));
+            const mosqueInfo = { name, location, code };
+            localStorage.setItem('mosqueGeneralInfo', JSON.stringify(mosqueInfo));
 
-        document.getElementById('mosqueSetupScreen').style.display = 'none';
-        applyMosqueInfo();
-        alert("تم إعداد وحفظ بيانات المسجد في قاعدة البيانات بنجاح!");
-    })
-    .catch((error) => {
-        alert("حدث خطأ أثناء الحفظ في قاعدة البيانات: " + error.message);
-    });
-}
-
-      function checkMosqueSetup() {
-    // استخدام مرجع قاعدة البيانات للتحقق مما إذا كانت إعدادات المسجد موجودة
-    const dbRef = ref(db);
-    get(child(dbRef, 'masjidConfig/')).then((snapshot) => {
-        if (!snapshot.exists()) {
-            // إذا لم تكن البيانات موجودة في قاعدة البيانات، أظهر شاشة الإعداد
-            document.getElementById('mosqueSetupScreen').style.display = 'flex';
-        } else {
-            // إذا كانت موجودة، اخفِ الشاشة واحفظ نسخة محلية لتسريع العرض ثم طبق البيانات
-            document.getElementById('mosqueSetupScreen').style.display = 'none';
-            const info = snapshot.val();
-            localStorage.setItem('mosqueGeneralInfo', JSON.stringify(info));
-            applyMosqueInfo();
-        }
-    }).catch((error) => {
-        console.error("خطأ في جلب بيانات المسجد: ", error);
-        // كحل احتياطي في حال انقطاع الاتصال، يمكنك التحقق من الـ localStorage
-        const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
-        if (!info) {
-            document.getElementById('mosqueSetupScreen').style.display = 'flex';
-        } else {
             document.getElementById('mosqueSetupScreen').style.display = 'none';
             applyMosqueInfo();
+            alert("تم إعداد بيانات المسجد بنجاح!");
         }
-    });
-}
 
-      function logoutMosqueSetup() {
-    if (confirm("هل أنت متأكد من تسجيل الخروج؟ سيتم إخفاء بيانات المسجد الحالية والعودة لشاشة التسجيل.")) {
-        // حذف إعدادات المسجد من Firebase Realtime Database
-        set(ref(db, 'masjidConfig/'), null)
-            .then(() => {
-                // حذف النسخ المحلية وتحديث الصفحة
+        function checkMosqueSetup() {
+            const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
+            if (!info) {
+                document.getElementById('mosqueSetupScreen').style.display = 'flex';
+            } else {
+                document.getElementById('mosqueSetupScreen').style.display = 'none';
+                applyMosqueInfo();
+            }
+        }
+
+        function logoutMosqueSetup() {
+            if (confirm("هل أنت متأكد من تسجيل الخروج؟ سيتم إخفاء بيانات المسجد الحالية والعودة لشاشة التسجيل.")) {
                 localStorage.removeItem('mosqueGeneralInfo');
                 localStorage.removeItem('adminAuthorized');
                 location.reload();
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء تسجيل الخروج من قاعدة البيانات: " + error.message);
-            });
-    }
-}
+            }
+        }
+
         function applyMosqueInfo() {
             const info = JSON.parse(localStorage.getItem('mosqueGeneralInfo'));
             if (info) {
@@ -1086,58 +1050,50 @@
             alert("تم قفل لوحة تحكم الإدارة بنجاح.");
         }
 
-      function savePrayerTimes(event) {
-    event.preventDefault();
-    const prayerTimes = {
-        fajr: document.getElementById('prayerFajr').value,
-        dhuhr: document.getElementById('prayerDhuhr').value,
-        asr: document.getElementById('prayerAsr').value,
-        maghrib: document.getElementById('prayerMaghrib').value,
-        isha: document.getElementById('prayerIsha').value
-    };
+        function savePrayerTimes(event) {
+            event.preventDefault();
+            const prayerTimes = {
+                fajr: document.getElementById('prayerFajr').value,
+                dhuhr: document.getElementById('prayerDhuhr').value,
+                asr: document.getElementById('prayerAsr').value,
+                maghrib: document.getElementById('prayerMaghrib').value,
+                isha: document.getElementById('prayerIsha').value
+            };
 
-    // حفظ مواقيت الصلاة في قاعدة بيانات Firebase
-    set(ref(db, 'masjidConfig/prayerTimes'), prayerTimes)
-        .then(() => {
-            // حفظ نسخة محلية لتسريع العرض
             localStorage.setItem('mosquePrayerTimes', JSON.stringify(prayerTimes));
             loadPrayerTimesUI();
-            alert("تم تحديث مواقيت الصلاة وحفظها في قاعدة البيانات بنجاح!");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء حفظ مواقيت الصلاة: " + error.message);
-        });
-}
+            alert("تم تحديث مواقيت الصلاة ونشرها في صفحة الطالب والأستاذ بنجاح!");
+        }
 
-       function loadPrayerTimesUI() {
-    const savedTimes = JSON.parse(localStorage.getItem('mosquePrayerTimes'));
-    let htmlContent = `<p style="color: #94a3b8; width: 100%; text-align: center;">لم تقم الإدارة بتحديد المواقيت بعد.</p>`;
+        function loadPrayerTimesUI() {
+            const savedTimes = JSON.parse(localStorage.getItem('mosquePrayerTimes'));
+            let htmlContent = `<p style="color: #94a3b8; width: 100%; text-align: center;">لم تقم الإدارة بتحديد المواقيت بعد.</p>`;
+            
+            if (savedTimes) {
+                htmlContent = `
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>الفجر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.fajr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>الظهر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.dhuhr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>العصر</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.asr}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>المغرب</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.maghrib}</span></div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);"><b>العشاء</b><br><span style="color: var(--accent-color); font-weight: bold;">${savedTimes.isha}</span></div>
+                `;
+            }
 
-    if (savedTimes) {
-        htmlContent = `
-            <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; margin-bottom: 8px;"><span>الفجر</span> <strong>${savedTimes.fajr || '--:--'}</strong></div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; margin-bottom: 8px;"><span>الظهر</span> <strong>${savedTimes.dhuhr || '--:--'}</strong></div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; margin-bottom: 8px;"><span>العصر</span> <strong>${savedTimes.asr || '--:--'}</strong></div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; margin-bottom: 8px;"><span>المغرب</span> <strong>${savedTimes.maghrib || '--:--'}</strong></div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between;"><span>العشاء</span> <strong>${savedTimes.isha || '--:--'}</strong></div>
-        `;
-    }
+            const studentContainer = document.getElementById('displayPrayerStudent');
+            if (studentContainer) studentContainer.innerHTML = htmlContent;
 
-    const studentContainer = document.getElementById('displayPrayerStudent');
-    if (studentContainer) studentContainer.innerHTML = htmlContent;
+            const professorContainer = document.getElementById('displayPrayerProfessor');
+            if (professorContainer) professorContainer.innerHTML = htmlContent;
 
-    const professorContainer = document.getElementById('displayPrayerProfessor');
-    if (professorContainer) professorContainer.innerHTML = htmlContent;
+            if (savedTimes && document.getElementById('prayerFajr')) {
+                document.getElementById('prayerFajr').value = savedTimes.fajr || '';
+                document.getElementById('prayerDhuhr').value = savedTimes.dhuhr || '';
+                document.getElementById('prayerAsr').value = savedTimes.asr || '';
+                document.getElementById('prayerMaghrib').value = savedTimes.maghrib || '';
+                document.getElementById('prayerIsha').value = savedTimes.isha || '';
+            }
+        }
 
-    if (savedTimes && document.getElementById('prayerFajr')) {
-        document.getElementById('prayerFajr').value = savedTimes.fajr || '';
-        document.getElementById('prayerDhuhr').value = savedTimes.dhuhr || '';
-        document.getElementById('prayerAsr').value = savedTimes.asr || '';
-        document.getElementById('prayerMaghrib').value = savedTimes.maghrib || '';
-        document.getElementById('prayerIsha').value = savedTimes.isha || '';
-    }
-}
-        
         function updateStatsCircles() {
             let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
             let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
@@ -1202,7 +1158,6 @@
                 document.getElementById('invitationModal').style.display = 'flex';
             }
         }
-        
         function closeInvitationModal() { document.getElementById('invitationModal').style.display = 'none'; }
         
         function openSummonsModal() {
@@ -1218,7 +1173,6 @@
                 document.getElementById('summonsModal').style.display = 'flex';
             }
         }
-        
         function closeSummonsModal() { document.getElementById('summonsModal').style.display = 'none'; }
 
         window.onclick = function(event) {
@@ -1228,50 +1182,30 @@
             if (event.target === document.getElementById('adminAuthModal')) document.getElementById('adminAuthModal').style.display = 'none';
         }
 
-      function savePostForm(event) {
-    event.preventDefault();
-    const title = document.getElementById('postTitleInput').value;
-    const content = document.getElementById('postContentInput').value;
-    const editIndex = parseInt(document.getElementById('editPostIndex').value);
-    const date = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+        function savePostForm(event) {
+            event.preventDefault();
+            const title = document.getElementById('postTitleInput').value;
+            const content = document.getElementById('postContentInput').value;
+            const editIndex = parseInt(document.getElementById('editPostIndex').value);
+            const date = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+            let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
 
-    if (editIndex === -1) {
-        // إضافة منشور جديد
-        const newPost = { title, content, date };
-        posts.unshift(newPost);
-        
-        // حفظ المنشورات الجديدة في فايربيس
-        set(ref(db, 'masjidConfig/posts'), posts)
-            .then(() => {
-                localStorage.setItem('mosquePosts', JSON.stringify(posts));
-                document.getElementById('postForm').reset();
-                loadAdminData();
+            if (editIndex === -1) {
+                posts.unshift({ title, content, date });
                 alert("تم نشر المنشور بنجاح!");
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء النشر: " + error.message);
-            });
-    } else {
-
-        posts[editIndex].title = title;
-        posts[editIndex].content = content;
-        posts[editIndex].date = date + " (معدل)";
-        
-        set(ref(db, 'masjidConfig/posts'), posts)
-            .then(() => {
-                localStorage.setItem('mosquePosts', JSON.stringify(posts));
-                document.getElementById('postForm').reset();
-                cancelEditPost();
-                loadAdminData();
+            } else {
+                posts[editIndex].title = title;
+                posts[editIndex].content = content;
+                posts[editIndex].date = date + " (معدل)";
                 alert("تم تحديث المنشور بنجاح!");
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء التحديث: " + error.message);
-            });
-    }
-}
+                cancelEditPost();
+            }
+
+            localStorage.setItem('mosquePosts', JSON.stringify(posts));
+            document.getElementById('postForm').reset();
+            loadAdminData();
+        }
 
         function editPost(index) {
             let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
@@ -1295,23 +1229,14 @@
             document.getElementById('postCancelBtn').style.display = 'none';
         }
 
-      function deletePost(index) {
-    if (confirm("هل أنت متأكد من حذف هذا المنشور نهائياً؟")) {
-        let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
-        posts.splice(index, 1);
-        
-        // تحديث المنشورات في قاعدة بيانات فايربيس بعد الحذف
-        set(ref(db, 'masjidConfig/posts'), posts)
-            .then(() => {
+        function deletePost(index) {
+            if (confirm("هل أنت متأكد من حذف هذا المنشور نهائياً؟")) {
+                let posts = JSON.parse(localStorage.getItem('mosquePosts')) || [];
+                posts.splice(index, 1);
                 localStorage.setItem('mosquePosts', JSON.stringify(posts));
                 loadAdminData();
-                alert("تم حذف المنشور بنجاح!");
-            })
-            .catch((error) => {
-                alert("حدث خطأ أثناء الحذف: " + error.message);
-            });
-    }
-}
+            }
+        }
 
         function loadPublicPosts() {
             const container = document.getElementById('publicPostsContainer');
@@ -1360,47 +1285,29 @@
             });
         }
 
-     function registerStudent(event) {
-    event.preventDefault();
-    const name = document.getElementById('studentName').value;
-    const age = parseInt(document.getElementById('studentAge').value);
-    const level = document.getElementById('studentLevel').value;
-    const preferredProf = document.getElementById('studentPreferredProf').value;
+        function registerStudent(event) {
+            event.preventDefault();
+            const name = document.getElementById('studentName').value;
+            const age = parseInt(document.getElementById('studentAge').value);
+            const level = document.getElementById('studentLevel').value;
+            const preferredProf = document.getElementById('studentPreferredProf').value;
 
-    if (age < 6) {
-        alert("عذراً، الحد الأدنى للتسجيل في حلقات المسجد هو 6 سنوات. لا يمكن إتمام التسجيل");
-        return;
-    }
+            if (age < 6) {
+                alert("عذراً، الحد الأدنى للتسجيل في حلقات المسجد هو 6 سنوات. لا يمكن إتمام التسجيل.");
+                return;
+            }
 
-    const newStudent = { 
-        name, 
-        age, 
-        level, 
-        professor: preferredProf, 
-        status: 'قيد الانتظار', 
-        hizbCount: 0, 
-        attendance: 'لم يسجل', 
-        notes: '' 
-    };
-
-    let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
-    students.push(newStudent);
-
-    // حفظ قائمة الطلاب في قاعدة بيانات فايربيس
-    set(ref(db, 'masjidConfig/students'), students)
-        .then(() => {
+            const newStudent = { name, age, level, professor: preferredProf, status: 'قيد الانتظار', hizbCount: 0, attendance: 'لم يسجل', notes: 'لم تُكتب ملاحظات بعد' };
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students.push(newStudent);
             localStorage.setItem('mosqueStudents', JSON.stringify(students));
             localStorage.setItem('currentStudentName', name);
 
             document.getElementById('studentForm').reset();
             checkStudentStatusUI();
-            alert("تم إرسال طلبك بنجاح، وهو بانتظار موافقة الإدارة");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء إرسال الطلب: " + error.message);
-        });
-}
-        
+            alert("تم إرسال طلبك بنجاح، وهو بانتظار موافقة الإدارة.");
+        }
+
         function checkStudentStatusUI() {
             const form = document.getElementById('studentRegistrationCard');
             const badge = document.getElementById('successBadge');
@@ -1445,28 +1352,20 @@
             }
         }
 
-       function registerProfessor(event) {
-    event.preventDefault();
-    const name = document.getElementById('profName').value;
-    const specialty = document.getElementById('profSpecialty').value;
-    const code = document.getElementById('profCode').value;
+        function registerProfessor(event) {
+            event.preventDefault();
+            const name = document.getElementById('profName').value;
+            const specialty = document.getElementById('profSpecialty').value;
+            const code = document.getElementById('profCode').value;
 
-    let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
-    professors.push({ name, specialty, code });
-
-    // حفظ قائمة الأساتذة في قاعدة بيانات فايربيس
-    set(ref(db, 'masjidConfig/professors'), professors)
-        .then(() => {
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            professors.push({ name, specialty, code });
             localStorage.setItem('mosqueProfessors', JSON.stringify(professors));
-            
+
             document.getElementById('professorRegisterForm').reset();
             loadAdminData();
             alert("تمت إضافة الأستاذ وكود الدخول السري بنجاح!");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء إضافة الأستاذ: " + error.message);
-        });
-}
+        }
 
         function verifyProfessorLogin(event) {
             event.preventDefault();
@@ -1546,46 +1445,31 @@
             });
         }
 
-      function setAttendance(globalIndex, statusType) {
-    let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
-    students[globalIndex].attendance = statusType;
-    
-    // تحديث حالة حضور الطلاب في قاعدة بيانات فايربيس
-    set(ref(db, 'masjidConfig/students'), students)
-        .then(() => {
+        function setAttendance(globalIndex, statusType) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[globalIndex].attendance = statusType;
             localStorage.setItem('mosqueStudents', JSON.stringify(students));
             loadProfessorTable(localStorage.getItem('loggedInProfName'));
-            alert(`تم تسجيل حالة الطالب كـ "${statusType}" بنجاح.`);
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء تحديث حالة الحضور: " + error.message);
-        });
-}
-        
-      function sendStudentReport(globalIndex) {
-    const hizbVal = parseInt(document.getElementById(`hizb-${globalIndex}`).value);
-    const notesVal = document.getElementById(`notes-${globalIndex}`).value;
+            alert(`تم تسجيل حالة الطالب كـ (${statusType}) بنجاح.`);
+        }
 
-    let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
-    students[globalIndex].hizbCount = hizbVal;
-    students[globalIndex].notes = notesVal ? notesVal : 'لا توجد ملاحظات';
+        function sendStudentReport(globalIndex) {
+            const hizbVal = parseInt(document.getElementById(`hizb-${globalIndex}`).value);
+            const notesVal = document.getElementById(`notes-${globalIndex}`).value;
 
-    // حفظ بيانات التقرير والطلاب في قاعدة بيانات فايربيس
-    set(ref(db, 'masjidConfig/students'), students)
-        .then(() => {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[globalIndex].hizbCount = hizbVal;
+            students[globalIndex].notes = notesVal ? notesVal : 'لا توجد ملاحظات';
+
             localStorage.setItem('mosqueStudents', JSON.stringify(students));
             loadProfessorTable(localStorage.getItem('loggedInProfName'));
 
             if (hizbVal >= 60) {
-                alert("مبروك! لقد أتم الطالب 60 حزباً، وتم إضافته تلقائياً إلى لوحة شرف الخاتمين وتفعيل دعوة التكريم 🏆");
+                alert("🏆 مبروك! لقد أتم الطالب 60 حزباً، وتم إضافته تلقائياً إلى لوحة شرف الخاتمين وتفعيل دعوة التكريم!");
             } else {
                 alert("تم حفظ التقرير بنجاح!");
             }
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء حفظ التقرير: " + error.message);
-        });
-}
+        }
 
         function loadAdminData() {
             updateStatsCircles();
@@ -1663,62 +1547,35 @@
             });
         }
 
-    function acceptStudent(index) {
-    let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
-    students[index].status = 'مقبول';
-
-    // حفظ حالة قبول الطالب سحابياً في فايربيس
-    set(ref(db, 'masjidConfig/students'), students)
-        .then(() => {
+        function acceptStudent(index) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students[index].status = 'مقبول';
             localStorage.setItem('mosqueStudents', JSON.stringify(students));
             loadAdminData();
             alert("تم قبول الطالب بنجاح وإصدار استدعاء القبول الخاص به!");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء قبول الطالب: " + error.message);
-        });
-}
+        }
 
-      function deleteStudent(index) {
-    let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
-    students.splice(index, 1);
-
-    // تحديث قاعدة بيانات فايربيس بعد حذف الطالب
-    set(ref(db, 'masjidConfig/students'), students)
-        .then(() => {
+        function deleteStudent(index) {
+            let students = JSON.parse(localStorage.getItem('mosqueStudents')) || [];
+            students.splice(index, 1);
             localStorage.setItem('mosqueStudents', JSON.stringify(students));
             loadAdminData();
-            alert("تم حذف الطالب بنجاح.");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء حذف الطالب: " + error.message);
-        });
-}
+        }
 
-       function deleteProfessor(index) {
-    let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
-    professions.splice(index, 1);
-
-    // تحديث قاعدة بيانات فايربيس بعد حذف الأستاذ
-    set(ref(db, 'masjidConfig/professors'), professors)
-        .then(() => {
-            localStorage.setItem('mosqueProfessors', JSON.stringify(professions));
+        function deleteProfessor(index) {
+            let professors = JSON.parse(localStorage.getItem('mosqueProfessors')) || [];
+            professors.splice(index, 1);
+            localStorage.setItem('mosqueProfessors', JSON.stringify(professors));
             loadAdminData();
-            alert("تم حذف الأستاذ بنجاح.");
-        })
-        .catch((error) => {
-            alert("حدث خطأ أثناء حذف الأستاذ: " + error.message);
-        });
-}
+        }
 
-window.addEventListener('DOMContentLoaded', () => {
-    checkMosqueSetup();
-    loadStudentProfessorsDropdown();
-    updateStatsCircles();
-    loadPrayerTimesUI();
-});
+        window.addEventListener('DOMContentLoaded', () => {
+            checkMosqueSetup();
+            loadStudentProfessorsDropdown();
+            updateStatsCircles();
+            loadPrayerTimesUI();
+        });
     </script>
-    
- 
+   
 </body>
 </html>
