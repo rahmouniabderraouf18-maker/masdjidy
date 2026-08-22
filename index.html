@@ -1577,24 +1577,57 @@
         });
     </script>
    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAR21avlFDhFUnQ8kEkcEA9H5142FwrjZg",
-    authDomain: "masdjidy-676a2.firebaseapp.com",
-    projectId: "masdjidy-676a2",
-      databaseURL: "https://masdjidy-676a2-default-rtdb.firebaseio.com",
-    storageBucket: "masdjidy-676a2.firebasestorage.app",
-    messagingSenderId: "751286968079",
-    appId: "1:751286968079:web:a764ad03b2061d013f287a"
-  };
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAR21avLFDhFunQ8kEkCEA9H5142FwrjZg",
+        authDomain: "masdjidy-676a2.firebaseapp.com",
+        databaseURL: "https://masdjidy-676a2-default-rtdb.firebaseio.com",
+        projectId: "masdjidy-676a2",
+        storageBucket: "masdjidy-676a2.firebasestorage.app",
+        messagingSenderId: "751286968079",
+        appId: "1:751286968079:web:a764ad03b2061d013f287a"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ربط زر الحفظ بقاعدة البيانات (تأكد أن زر الحفظ لديك لديه id باسم saveBtn أو استبدله بما يناسبك)
+    const saveBtn = document.querySelector("button"); // أو يمكنك استخدام معرف الزر
+    if (saveBtn) {
+        saveBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            // جلب الحقول بناءً على ترتيبها في صفحتك
+            const inputs = document.querySelectorAll("input");
+            const mosqueName = inputs[0] ? inputs[0].value : "";
+            const mosqueLocation = inputs[1] ? inputs[1].value : "";
+            const mosquePin = inputs[2] ? inputs[2].value : "";
+
+            if (!mosqueName || !mosqueLocation || !mosquePin) {
+                alert("الرجاء ملء جميع الحقول!");
+                return;
+            }
+
+            // حفظ البيانات في Realtime Database
+            set(ref(db, 'masjidConfig/'), {
+                name: mosqueName,
+                location: mosqueLocation,
+                pin: mosquePin
+            })
+            .then(() => {
+                alert("تم حفظ بيانات المسجد بنجاح في قاعدة البيانات!");
+            })
+            .catch((error) => {
+                alert("حدث خطأ أثناء الحفظ: " + error.message);
+            });
+        });
+    }
 </script>
+ 
 </body>
 </html>
